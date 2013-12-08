@@ -1,7 +1,7 @@
 navecitas
 =========
 
-Repo privado para el juego del taller e GameMe5
+Repo privado para el juego del taller de GameMe5
 
 ### Resources
 * [gamepad](http://html5gamepad.com/)

@@ -1,0 +1,49 @@
+{
+  "name": "navecitas",
+  "version": "0.0.0",
+  "description": "Juego para el taller de GameMe5",
+  "main": "main.js",
+  "scripts": {
+    "test": "grunt",
+    "start": "grunt connect watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/serginator/navecitas.git"
+  },
+  "keywords": [
+    "shootem",
+    "shootem'up",
+    "game",
+    "javascript",
+    "spaceship",
+    "gameme5",
+    "html5",
+    "canvas"
+  ],
+  "author": [
+    {
+      "name": "Sergio Ruiz (@serginator)",
+      "email": "serginator@gmail.com",
+      "url": "http://www.serginator.com/"
+    },
+    {
+      "name": "Carlos Benitez (@etnassoft)",
+      "email": "etnasdrivers@hotmail.com",
+      "url": "http://www.etnassoft.com"
+    }
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/serginator/navecitas/issues"
+  },
+  "devDependencies": {
+    "grunt-gjslint": "~0.1.3",
+    "grunt-contrib-jshint": "~0.7.2",
+    "grunt": "~0.4.2",
+    "grunt-contrib-watch": "~0.5.3",
+    "load-grunt-tasks": "~0.2.0",
+    "jshint-stylish": "~0.1.4",
+    "grunt-contrib-connect": "~0.5.0"
+  }
+}
