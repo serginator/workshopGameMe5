@@ -1,26 +1,26 @@
 // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-window.requestAnimFrame = (function () {
+window.requestAnimFrame = (function() {
     return window.requestAnimationFrame ||
-        window.webkitRequestAnimationFrame  ||
-        window.mozRequestAnimationFrame     ||
-        window.oRequestAnimationFrame       ||
-        window.msRequestAnimationFrame      ||
-        function ( /* function */ callback, /* DOMElement */ element) {
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function(/*function */callback, /* DOMElement*/element) {
             window.setTimeout(callback, 1000 / 60);
         };
 })();
-var arrayRemove = function (array, from) {
+var arrayRemove = function(array, from) {
     var rest = array.slice((from) + 1 || array.length);
     array.length = from < 0 ? array.length + from : from;
     return array.push.apply(array, rest);
 };
-var game = (function () {
+var game = (function() {
 
     // Global vars
     var canvas, ctx, buffer, bufferctx,
         bgMain, bgMain2, bgSpeed = 2,
         shots = [],      //Array of shots
-        keyPressed = {}, // No es necesario iniciar todas las posiblidades a false.
+        keyPressed = {},
         keyMap = {
             left: 37,
             up: 38,
@@ -42,14 +42,15 @@ var game = (function () {
     }
 
     function extend(destination, source) {
-        for (var property in source)
+        for (var property in source) {
             destination[property] = source[property];
+        }
         return destination;
     }
 
     function init() {
         canvas = document.getElementById('canvas');
-        ctx = canvas.getContext("2d");
+        ctx = canvas.getContext('2d');
 
         // Buffering
         buffer = document.createElement('canvas');
@@ -67,7 +68,7 @@ var game = (function () {
         bgMain2.src = 'images/landscape.png';
         bgMain2.posX = 0;
 
-        player = new Player(),
+        player = new Player();
         enemy = new Enemy();
 
         // Attach keyboard control
@@ -75,7 +76,7 @@ var game = (function () {
         addListener(document, 'keyup', keyUp);
 
         // Gameloop
-        var anim = function () {
+        var anim = function() {
             loop();
             window.requestAnimFrame(anim);
         };
@@ -86,12 +87,13 @@ var game = (function () {
         player = new Image();
         player.src = 'images/ship.png';
         player.posX = 30; // Dedault X position
-        player.posY = (canvas.height / 2) - (player.height / 2); // Default Y posiion
+        player.posY = (canvas.height / 2) - (player.height / 2); // Def Y pos
         player.speed = 5;
 
-        player.fire = function () {
+        player.fire = function() {
             if (nextShootTime < currentTime || currentTime === 0) {
-                var shot = new Shot(this, player.posX + 45, player.posY + 23, 5);
+                var shot = new Shot(this, player.posX + 45,
+                    player.posY + 23, 5);
                 shot.add();
                 currentTime += shotDelay;
                 nextShootTime = currentTime + shotDelay;
@@ -110,10 +112,10 @@ var game = (function () {
         shot.speed = _speed;
         shot.id = 0;
         shot.time = new Date().getTime();
-        shot.add = function () {
+        shot.add = function() {
             shots.push(shot);
         };
-        shot.del = function (id) {
+        shot.del = function(id) {
             arrayRemove(shots, id);
         };
         return shot;
@@ -125,18 +127,22 @@ var game = (function () {
         enemy.posX = canvas.width - enemy.width;
         enemy.posY = canvas.height / 2 - enemy.width / 2;
         enemy.life = 5; //5 hits
-        enemy.backToLife = function () {
+        enemy.backToLife = function() {
             this.life = 5;
-            this.posY = Math.floor(Math.random() * (canvas.height - this.height));
-            this.posX = Math.floor(Math.random() * (canvas.width - this.width - player.width)) + player.width;
+            this.posY = Math.floor(Math.random() *
+                (canvas.height - this.height));
+            this.posX = Math.floor(Math.random() *
+                (canvas.width - this.width - player.width)) + player.width;
         };
         return enemy;
     }
 
     function checkCollisions(shot) {
-        if (shot.posX >= enemy.posX && shot.posX <= (enemy.posX + enemy.width)) {
-            if (shot.posY >= enemy.posY && shot.posY <= (enemy.posY + enemy.height)) {
-                (enemy.life > 1) ? enemy.life-- : enemy.backToLife();
+        if (shot.posX >= enemy.posX && shot.posX <=
+            (enemy.posX + enemy.width)) {
+            if (shot.posY >= enemy.posY && shot.posY <=
+                (enemy.posY + enemy.height)) {
+                var aux = (enemy.life > 1) ? enemy.life-- : enemy.backToLife();
                 shot.del(parseInt(shot.id, 10));
                 return false;
             }
@@ -147,9 +153,8 @@ var game = (function () {
     /**
      * Scroll Background
      * @param {obj} layers An oject with the backgounds to slide and the speed.
-     * @returns none
      */
-    var scrollBackground = function (layers) {
+    var scrollBackground = function(layers) {
         var settings = {
             speed: bgSpeed,
             source: []
@@ -159,24 +164,33 @@ var game = (function () {
         for (var x = 0, i = settings.source.length; x < i; x++) {
             settings.source[x].posX -= settings.speed;
             if (settings.source[x].posX > -(settings.source[x].width)) {
-                bufferctx.drawImage(settings.source[x], settings.source[x].posX, 0);
+                bufferctx.drawImage(settings.source[x],
+                    settings.source[x].posX, 0);
             } else {
-                settings.source[x].posX = settings.source[x].width - (canvas.width / 380) - 650;
+                settings.source[x].posX = settings.source[x].width -
+                    (canvas.width / 380) - 650;
             }
         }
     };
 
     function playerAction() {
-        if (keyPressed.up && player.posY > 5)
+        if (keyPressed.up && player.posY > 5) {
             player.posY -= player.speed;
-        if (keyPressed.down && player.posY < (canvas.height - player.height - 5))
+        }
+        if (keyPressed.down && player.posY <
+            (canvas.height - player.height - 5)) {
             player.posY += player.speed;
-        if (keyPressed.left && player.posX > 5)
+        }
+        if (keyPressed.left && player.posX > 5) {
             player.posX -= player.speed;
-        if (keyPressed.right && player.posX < (canvas.width - player.width - 5))
+        }
+        if (keyPressed.right && player.posX <
+            (canvas.width - player.width - 5)) {
             player.posX += player.speed;
-        if (keyPressed.fire)
+        }
+        if (keyPressed.fire) {
             player.fire();
+        }
         if (keyPressed.speedUp && bgSpeed < 10) {
             bgSpeed += 1;
             console.log(bgSpeed);
@@ -197,7 +211,9 @@ var game = (function () {
             element.addEventListener(type, expression, bubbling);
         } else if (window.attachEvent) { // IE
             element.attachEvent('on' + type, expression);
-        } else return false;
+        } else {
+            return false;
+        }
     }
 
     function keyDown(e) {
