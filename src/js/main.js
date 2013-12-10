@@ -35,7 +35,7 @@ var game = ( function () {
             fire2: 17,    // Ctrl
             speedUp: 34,  // Av Pag
             speedDown: 33, // Re Pag
-            t: 116, // T, toggle music
+            t: 84, // T, toggle music
             b: 98, // B, bombs
             lshift: 304 // Left shift, slow down
         },
@@ -43,7 +43,8 @@ var game = ( function () {
         shotDelay = 100,
         currentTime = 0,
         player, enemy,
-        audioCtx, audioBuffer, audioMusic, currentAudioMusic;
+        audioCtx, audioBuffer, audioMusic, currentAudioMusic,
+        changingMusic = false;
 
     function loop () {
         update();
@@ -60,8 +61,6 @@ var game = ( function () {
     function init () {
         canvas = document.getElementById( 'canvas' );
         ctx = canvas.getContext( '2d' );
-        window.AudioContext = window.AudioContext || window.webkitAudioContext;
-        audioCtx = new window.AudioContext();
 
         // Buffering
         buffer = document.createElement('canvas');
@@ -69,68 +68,73 @@ var game = ( function () {
         buffer.height = canvas.height;
         bufferctx = buffer.getContext('2d');
 
-        // Load resources
-        // Background pattern
-        bgMain = new Image();
-        bgMain.src = 'images/starfield-1.jpg';
-        bgMain.posX = bgMain.width;
-        bgMain.posY = -bgMain.height;
+        ctx.fillStyle = '#fff';
+        ctx.font = 'italic 25px arial';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('Loading...', buffer.width - 200, buffer.height - 50);
 
-        bgMain2 = new Image();
-        bgMain2.src = 'images/starfield-1.jpg';
-        bgMain2.posX = 0;
-        bgMain2.posY = 0;
-
-        bgMain3 = new Image();
-        bgMain3.src = 'images/starfield-3.png';
-        bgMain3.posX = bgMain3.width;
-        bgMain3.posY = -bgMain3.height;
-
-        bgMain4 = new Image();
-        bgMain4.src = 'images/starfield-3.png';
-        bgMain4.posX = 0;
-        bgMain4.posY = 0;
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new window.AudioContext();
 
         // Audio stuff
-        audioBuffer = new window.BufferLoader(audioCtx, [
-            '../Music/16-bits-TFIV-Stand-Up-Against-Myself.mp3',
-            '../Music/32-bits-TFV-Steel-Of-Destiny.mp3',
-            '../Music/128-bits-Ikaruga-Ideal.mp3'
+        audioBuffer = new BufferLoader(audioCtx, [
+            'Music/MP3/16-bits-TFIV-Stand-Up-Against-Myself.mp3',
+            'Music/MP3/32-bits-TFV-Steel-Of-Destiny.mp3',
+            'Music/MP3/128-bits-Ikaruga-Ideal.mp3'
         ], createAudioSources);
-
         audioBuffer.load();
 
-        player = new Player();
-        enemy = new Enemy();
+        setTimeout(function() {
+            // Load resources
+            // Background pattern
+            bgMain = new Image();
+            bgMain.src = 'images/starfield-1.jpg';
+            bgMain.posX = bgMain.width;
+            bgMain.posY = -bgMain.height;
 
-        // Attach keyboard control
-        addListener(document, 'keydown', keyDown);
-        addListener(document, 'keyup', keyUp);
+            bgMain2 = new Image();
+            bgMain2.src = 'images/starfield-1.jpg';
+            bgMain2.posX = 0;
+            bgMain2.posY = 0;
 
-        audioMusic[0].play(0);
-        currentAudioMusic = 0;
+            bgMain3 = new Image();
+            bgMain3.src = 'images/starfield-3.png';
+            bgMain3.posX = bgMain3.width;
+            bgMain3.posY = -bgMain3.height;
 
-        // Gameloop
-        var anim = function() {
-            loop();
-            window.requestAnimFrame(anim);
-        };
-        anim();
+            bgMain4 = new Image();
+            bgMain4.src = 'images/starfield-3.png';
+            bgMain4.posX = 0;
+            bgMain4.posY = 0;
+
+            player = new Player();
+            enemy = new Enemy();
+
+            // Attach keyboard control
+            addListener(document, 'keydown', keyDown);
+            addListener(document, 'keyup', keyUp);
+
+            currentAudioMusic = 0;
+
+            // Gameloop
+            var anim = function() {
+                loop();
+                window.requestAnimFrame(anim);
+            };
+            anim();
+        }, 10000);
+
     }
 
     function createAudioSources(list) {
         audioMusic = []
-        audioMusic[0] = audioCtx.createBufferSource();
-        audioMusic[1] = audioCtx.createBufferSource();
-        audioMusic[2] = audioCtx.createBufferSource();
-
-        audioMusic[0].buffer = audioBuffer[0];
-        audioMusic[1].buffer = audioBuffer[1];
-        audioMusic[2].buffer = audioBuffer[2];
-
-        audioMusic[0].connect(audioCtx.destination);
-        audioMusic[1].connect(audioCtx.destination);
-        audioMusic[2].connect(audioCtx.destination);
+        for (var i = 0; i < 3; i++) {
+            audioMusic[i] = audioCtx.createBufferSource();
+            audioMusic[i].buffer = audioBuffer.bufferList[i];
+            audioMusic[i].connect(audioCtx.destination);
+            audioMusic[i].loop = true;
+        }
+        audioMusic[0].start(0);
     }
 
     function Player ( player ) {
@@ -296,7 +300,11 @@ var game = ( function () {
             console.log(bgSpeed);
         }
         if (keyPressed.t) {
-            changeAudioMusic();
+            if (!changingMusic) {
+                changingMusic = true;
+                changeAudioMusic();
+                console.log('Changing music');
+            }
         }
     }
 
@@ -327,6 +335,9 @@ var game = ( function () {
 
     function keyUp(e) {
         var key = (window.event ? e.keyCode : e.which);
+        if (key === 84) {
+            changingMusic = false;
+        }
         for (var inkey in keyMap) {
             if (key === keyMap[inkey]) {
                 e.preventDefault();
@@ -372,13 +383,12 @@ var game = ( function () {
     }
 
     function changeAudioMusic() {
-        audioMusic[currentAudioMusic].stop();
+        audioMusic[currentAudioMusic].stop(0);
         currentAudioMusic++;
-        if (currentAudioMusic <= audioMusic.length - 1) {
-            audioMusic[currentAudioMusic].play(0);
-        } else {
-            audioMusic[currentAudioMusic - 3].play(0);
+        if (currentAudioMusic > audioMusic.length - 1) {
+            currentAudioMusic -= 3
         }
+        audioMusic[currentAudioMusic].start(0);
     }
 
     // Public Methods

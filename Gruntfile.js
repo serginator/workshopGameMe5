@@ -65,7 +65,8 @@ module.exports = function (grunt) {
             server: {
                 options: {
                     port: 8000,
-                    base: 'index.html',
+                    base: 'src',
+                    open: 'http://localhost:8000/index.html',
                     keepalive: true
                 }
             }
