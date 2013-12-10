@@ -129,12 +129,16 @@ var game = ( function () {
     function createAudioSources(list) {
         audioMusic = []
         for (var i = 0; i < 3; i++) {
-            audioMusic[i] = audioCtx.createBufferSource();
-            audioMusic[i].buffer = audioBuffer.bufferList[i];
-            audioMusic[i].connect(audioCtx.destination);
-            audioMusic[i].loop = true;
+            setAudioSource(i);
         }
         audioMusic[0].start(0);
+    }
+
+    function setAudioSource(index) {
+        audioMusic[index] = audioCtx.createBufferSource();
+            audioMusic[index].buffer = audioBuffer.bufferList[index];
+            audioMusic[index].connect(audioCtx.destination);
+            audioMusic[index].loop = true;
     }
 
     function Player ( player ) {
@@ -388,6 +392,7 @@ var game = ( function () {
         if (currentAudioMusic > audioMusic.length - 1) {
             currentAudioMusic -= 3
         }
+        setAudioSource(currentAudioMusic);
         audioMusic[currentAudioMusic].start(0);
     }
 
