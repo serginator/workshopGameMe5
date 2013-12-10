@@ -1,5 +1,5 @@
 // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-window.requestAnimFrame = (function() {
+window.requestAnimFrame = ( function () {
     return window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
         window.mozRequestAnimationFrame ||
@@ -8,17 +8,20 @@ window.requestAnimFrame = (function() {
         function(/*function */callback, /* DOMElement*/element) {
             window.setTimeout(callback, 1000 / 60);
         };
-})();
-var arrayRemove = function(array, from) {
-    var rest = array.slice((from) + 1 || array.length);
+} ) ();
+
+var arrayRemove = function( array, from ) {
+    var rest = array.slice( ( from ) + 1 || array.length );
     array.length = from < 0 ? array.length + from : from;
-    return array.push.apply(array, rest);
+    return array.push.apply( array, rest );
 };
-var game = (function() {
+
+var game = ( function () {
 
     // Global vars
     var canvas, ctx, buffer, bufferctx,
-        bgMain, bgMain2, bgSpeed = 2,
+        bgMain, bgMain2, bgMain3, bgMain4, bgSpeed = 2,
+        to_radians = Math.PI / 180,
         shots = [],      //Array of shots
         keyPressed = {},
         keyMap = {
@@ -26,31 +29,39 @@ var game = (function() {
             up: 38,
             right: 39,
             down: 40,
+            rotateLeft: 65, // A
+            rotateRight: 68, // D
             fire: 32,     // Spacebar
             fire2: 17,    // Ctrl
             speedUp: 34,  // Av Pag
-            speedDown: 33 // Re Pag
+            speedDown: 33, // Re Pag
+            t: 116, // T, toggle music
+            b: 98, // B, bombs
+            lshift: 304 // Left shift, slow down
         },
         nextShootTime = 0,
         shotDelay = 100,
         currentTime = 0,
-        player, enemy;
+        player, enemy,
+        audioCtx, audioBuffer, audioMusic, currentAudioMusic;
 
-    function loop() {
+    function loop () {
         update();
         draw();
     }
 
-    function extend(destination, source) {
-        for (var property in source) {
-            destination[property] = source[property];
+    function extend ( destination, source ) {
+        for ( var property in source ) {
+            destination[ property ] = source[ property ];
         }
         return destination;
     }
 
-    function init() {
-        canvas = document.getElementById('canvas');
-        ctx = canvas.getContext('2d');
+    function init () {
+        canvas = document.getElementById( 'canvas' );
+        ctx = canvas.getContext( '2d' );
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new window.AudioContext();
 
         // Buffering
         buffer = document.createElement('canvas');
@@ -61,12 +72,33 @@ var game = (function() {
         // Load resources
         // Background pattern
         bgMain = new Image();
-        bgMain.src = 'images/landscape.png';
-        bgMain.posX = canvas.width;
+        bgMain.src = 'images/starfield-1.jpg';
+        bgMain.posX = bgMain.width;
+        bgMain.posY = -bgMain.height;
 
         bgMain2 = new Image();
-        bgMain2.src = 'images/landscape.png';
+        bgMain2.src = 'images/starfield-1.jpg';
         bgMain2.posX = 0;
+        bgMain2.posY = 0;
+
+        bgMain3 = new Image();
+        bgMain3.src = 'images/starfield-3.png';
+        bgMain3.posX = bgMain3.width;
+        bgMain3.posY = -bgMain3.height;
+
+        bgMain4 = new Image();
+        bgMain4.src = 'images/starfield-3.png';
+        bgMain4.posX = 0;
+        bgMain4.posY = 0;
+
+        // Audio stuff
+        audioBuffer = new window.BufferLoader(audioCtx, [
+            '../Music/16-bits-TFIV-Stand-Up-Against-Myself.mp3',
+            '../Music/32-bits-TFV-Steel-Of-Destiny.mp3',
+            '../Music/128-bits-Ikaruga-Ideal.mp3'
+        ], createAudioSources);
+
+        audioBuffer.load();
 
         player = new Player();
         enemy = new Enemy();
@@ -74,6 +106,9 @@ var game = (function() {
         // Attach keyboard control
         addListener(document, 'keydown', keyDown);
         addListener(document, 'keyup', keyUp);
+
+        audioMusic[0].play(0);
+        currentAudioMusic = 0;
 
         // Gameloop
         var anim = function() {
@@ -83,9 +118,24 @@ var game = (function() {
         anim();
     }
 
-    function Player(player) {
+    function createAudioSources(list) {
+        audioMusic = []
+        audioMusic[0] = audioCtx.createBufferSource();
+        audioMusic[1] = audioCtx.createBufferSource();
+        audioMusic[2] = audioCtx.createBufferSource();
+
+        audioMusic[0].buffer = audioBuffer[0];
+        audioMusic[1].buffer = audioBuffer[1];
+        audioMusic[2].buffer = audioBuffer[2];
+
+        audioMusic[0].connect(audioCtx.destination);
+        audioMusic[1].connect(audioCtx.destination);
+        audioMusic[2].connect(audioCtx.destination);
+    }
+
+    function Player ( player ) {
         player = new Image();
-        player.src = 'images/ship.png';
+        player.src = 'images/ship-2.png';
         player.posX = 30; // Dedault X position
         player.posY = (canvas.height / 2) - (player.height / 2); // Def Y pos
         player.speed = 5;
@@ -152,30 +202,70 @@ var game = (function() {
 
     /**
      * Scroll Background
-     * @param {obj} layers An oject with the backgounds to slide and the speed.
+     * @param {obj} layers An oject with the backgounds to slide and speed.
      */
-    var scrollBackground = function(layers) {
-        var settings = {
-            speed: bgSpeed,
-            source: []
-        };
-        extend(settings, layers);
+    var scrollBackground = function ( layersGroup ) {
+        if ( ! Array.isArray( layersGroup ) ) layersGroup = [ layersGroup ];
 
-        for (var x = 0, i = settings.source.length; x < i; x++) {
-            settings.source[x].posX -= settings.speed;
-            if (settings.source[x].posX > -(settings.source[x].width)) {
-                bufferctx.drawImage(settings.source[x],
-                    settings.source[x].posX, 0);
-            } else {
-                settings.source[x].posX = settings.source[x].width -
-                    (canvas.width / 380) - 650;
+        layersGroup.forEach( function ( layers ) {
+            var settings = {
+                source: [],
+                orientation: 'horizontal',
+                moveTo: 'right'
+            },
+            index = layers.source.length,
+            axis, magnitude, displace, calculateNewMove, newPosition;
+
+            extend( settings, layers );
+            settings.speed = layers.speed ? bgSpeed * layers.speed : bgSpeed;
+
+            while ( index-- ) {
+                axis = ( settings.orientation === 'horizontal' ) ? 'X' : 'Y';
+                magnitude = ( settings.orientation === 'horizontal' ) ? 'width' : 'height';
+                displace = ( settings.moveTo === 'down' || settings.moveTo === 'right' ) ? 'negative' : 'positive';
+
+                displace === 'positive'
+                    ? settings.source[index][ 'pos' + axis ] -= settings.speed
+                    : settings.source[index][ 'pos' + axis ] += settings.speed;
+
+                calculateNewMove = ( displace === 'positive' )
+                    ? settings.source[index][ 'pos' + axis ] > -( settings.source[ index ][ magnitude ] )
+                    : settings.source[index][ 'pos' + axis ] < settings.source[ index ][ magnitude ];
+
+                if ( calculateNewMove ) {
+                    newPosition = settings.source[index][ 'pos' + axis ];
+                    bufferctx.drawImage( settings.source[index], ( axis === 'X' ) ? newPosition : 0, ( axis === 'Y' ) ? newPosition : 0 );
+                } else {
+                    newPosition = settings.source[index][ magnitude ];
+                    settings.source[index][ 'pos' + axis ] = ( displace === 'positive' ) ? newPosition : Math.abs( newPosition ) * -1;
+                }
             }
-        }
+        } );
     };
+
+    function rotateElement ( image, ctxTmp, x, y, angle ) {
+        ctxTmp.save();
+        ctxTmp.translate( x, y );
+        ctxTmp.rotate( angle * to_radians );
+        ctxTmp.drawImage( image, - ( image.width / 2 ), - ( image.height / 2 ) );
+        ctxTmp.restore();
+    }
+
+    function playerUp() {
+        player.posY -= player.speed;
+    }
+
+    function rotateLeft () {
+        // rotateElement( player, player.posX, player.posY, 90 );
+    }
+
+    function rotateRight () {
+        // rotateElement( player, player.posX, player.posY, -90 );
+    }
 
     function playerAction() {
         if (keyPressed.up && player.posY > 5) {
-            player.posY -= player.speed;
+            playerUp();
         }
         if (keyPressed.down && player.posY <
             (canvas.height - player.height - 5)) {
@@ -188,6 +278,12 @@ var game = (function() {
             (canvas.width - player.width - 5)) {
             player.posX += player.speed;
         }
+        if (keyPressed.rotateLeft) {
+            rotateLeft();
+        }
+        if (keyPressed.rotateRight) {
+            rotateRight();
+        }
         if (keyPressed.fire) {
             player.fire();
         }
@@ -198,6 +294,9 @@ var game = (function() {
         if (keyPressed.speedDown && bgSpeed >= 2) {
             bgSpeed -= 1;
             console.log(bgSpeed);
+        }
+        if (keyPressed.t) {
+            changeAudioMusic();
         }
     }
 
@@ -241,9 +340,16 @@ var game = (function() {
     }
 
     function update() {
-        scrollBackground({
-            source: [bgMain, bgMain2]
-        });
+        scrollBackground( [ {
+            source: [bgMain, bgMain2],
+            orientation: 'vertical',
+            moveTo: 'up'
+        }, {
+            source: [bgMain3, bgMain4],
+            speed: 3,
+            orientation: 'vertical',
+            moveTo: 'down'
+        } ] );
 
         bufferctx.drawImage(player, player.posX, player.posY);
         bufferctx.drawImage(enemy, enemy.posX, enemy.posY);
@@ -265,9 +371,19 @@ var game = (function() {
         playerAction();
     }
 
+    function changeAudioMusic() {
+        audioMusic[currentAudioMusic].stop();
+        currentAudioMusic++;
+        if (currentAudioMusic <= audioMusic.length - 1) {
+            audioMusic[currentAudioMusic].play(0);
+        } else {
+            audioMusic[currentAudioMusic - 3].play(0);
+        }
+    }
+
     // Public Methods
     return {
         init: init
-    };
+    }
 
-})();
+} ) ();
