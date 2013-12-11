@@ -72,79 +72,79 @@ var game = ( function () {
         buffer.height = canvas.height;
         bufferctx = buffer.getContext('2d');
 
-		ctx.fillStyle = '#fff';
-		ctx.font = 'italic 25px arial';
-		ctx.textBaseline = 'bottom';
-		ctx.fillText('Loading...', buffer.width - 200, buffer.height - 50);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'italic 25px arial';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('Loading...', buffer.width - 200, buffer.height - 50);
 
-		window.AudioContext = window.AudioContext || window.webkitAudioContext;
-		audioCtx = new window.AudioContext();
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new window.AudioContext();
 
-		// Audio stuff
-		audioBuffer = new BufferLoader(audioCtx, [
-			'Music/MP3/16-bits-TFIV-Stand-Up-Against-Myself.mp3',
-			'Music/MP3/32-bits-TFV-Steel-Of-Destiny.mp3',
-			'Music/MP3/128-bits-Ikaruga-Ideal.mp3'
-		], createAudioSources);
-		audioBuffer.load();
+        // Audio stuff
+        audioBuffer = new BufferLoader(audioCtx, [
+            'Music/MP3/16-bits-TFIV-Stand-Up-Against-Myself.mp3',
+            'Music/MP3/32-bits-TFV-Steel-Of-Destiny.mp3',
+            'Music/MP3/128-bits-Ikaruga-Ideal.mp3'
+        ], createAudioSources);
+        audioBuffer.load();
 
-		setTimeout(function() {
-			// Load resources
-			// Background pattern
-			background = new Image();
-			background.src = 'images/background-1.jpg';
-			background.posX = 0;
+        setTimeout(function() {
+            // Load resources
+            // Background pattern
+            background = new Image();
+            background.src = 'images/background-1.jpg';
+            background.posX = 0;
 
-			background2 = new Image();
-			background2.src = 'images/background-2.jpg';
-			background2.posX = background.width;
+            background2 = new Image();
+            background2.src = 'images/background-2.jpg';
+            background2.posX = background.width;
 
-			background3 = new Image();
-			background3.src = 'images/background-3.jpg';
-			background3.posX = background.width * 2;
+            background3 = new Image();
+            background3.src = 'images/background-3.jpg';
+            background3.posX = background.width * 2;
 
-			background4 = new Image();
-			background4.src = 'images/background-4.jpg';
-			background4.posX = background.width * 3;
+            background4 = new Image();
+            background4.src = 'images/background-4.jpg';
+            background4.posX = background.width * 3;
 
-			foreground = new Image();
-			foreground.src = 'images/foreground-1.png';
-			foreground.posX = 0;
+            foreground = new Image();
+            foreground.src = 'images/foreground-1.png';
+            foreground.posX = 0;
 
-			foreground2 = new Image();
-			foreground2.src = 'images/foreground-2.png';
-			foreground2.posX = foreground.width;
+            foreground2 = new Image();
+            foreground2.src = 'images/foreground-2.png';
+            foreground2.posX = foreground.width;
 
-			foreground3 = new Image();
-			foreground3.src = 'images/foreground-3.png';
-			foreground3.posX = foreground.width * 2;
+            foreground3 = new Image();
+            foreground3.src = 'images/foreground-3.png';
+            foreground3.posX = foreground.width * 2;
 
-			foreground4 = new Image();
-			foreground4.src = 'images/foreground-4.png';
-			foreground4.posX = foreground.width * 3;
+            foreground4 = new Image();
+            foreground4.src = 'images/foreground-4.png';
+            foreground4.posX = foreground.width * 3;
 
-			starfield = new Image();
-			starfield.src = 'images/starfield-2.png';
-			starfield.posX = 0;
+            starfield = new Image();
+            starfield.src = 'images/starfield-2.png';
+            starfield.posX = 0;
 
-			starfield2 = new Image();
-			starfield2.src = 'images/starfield-2.png';
-			starfield2.posX = starfield.width;
+            starfield2 = new Image();
+            starfield2.src = 'images/starfield-2.png';
+            starfield2.posX = starfield.width;
 
-			player = new Player();
-			enemy = new Enemy();
+            player = new Player();
+            enemy = new Enemy();
 
-			// Attach keyboard control
-			addListener(document, 'keydown', keyDown);
-			addListener(document, 'keyup', keyUp);
+            // Attach keyboard control
+            addListener(document, 'keydown', keyDown);
+            addListener(document, 'keyup', keyUp);
 
-			// Gameloop
-			var anim = function() {
-				loop();
-				window.requestAnimFrame(anim);
-			};
-			anim();
-		}, 10000);
+            // Gameloop
+            var anim = function() {
+                loop();
+                window.requestAnimFrame(anim);
+            };
+            anim();
+        }, 10000);
     }
 
     function createAudioSources(list) {
