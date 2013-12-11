@@ -49,7 +49,7 @@ var game = ( function () {
         shotDelay = 100,
         currentTime = 0,
         player, enemy,
-        audioCtx, audioBuffer, audioMusic, currentAudioMusic,
+        audioCtx, audioBuffer, audioMusic, currentAudioMusic, gainNode,
         changingMusic = false;
 
     function loop () {
@@ -158,17 +158,38 @@ var game = ( function () {
 
     function createAudioSources(list) {
         audioMusic = [];
+        gainNode = audioCtx.createGain();
         for (var i = 0; i < 3; i++) {
             setAudioSource(i);
         }
+        gainNode.connect(audioCtx.destination);
+        gainNode.gain.value = 1;
         audioMusic[0].start(0);
     }
 
     function setAudioSource(index) {
         audioMusic[index] = audioCtx.createBufferSource();
-            audioMusic[index].buffer = audioBuffer.bufferList[index];
-            audioMusic[index].connect(audioCtx.destination);
-            audioMusic[index].loop = true;
+        audioMusic[index].buffer = audioBuffer.bufferList[index];
+        audioMusic[index].connect(gainNode);
+        audioMusic[index].loop = true;
+    }
+
+    function changeAudioMusic() {
+        audioMusic[currentAudioMusic].stop(0);
+        currentAudioMusic++;
+        if (currentAudioMusic > audioMusic.length - 1) {
+            currentAudioMusic -= 3;
+        }
+        setAudioSource(currentAudioMusic);
+        audioMusic[currentAudioMusic].start(0);
+    }
+
+    function toggleMute() {
+        if (gainNode.gain.value === 1) {
+            gainNode.gain.value = 0;
+        } else {
+            gainNode.gain.value = 1;
+        }
     }
 
     function Player ( player ) {
@@ -610,25 +631,6 @@ var game = ( function () {
         playerAction();
 
         particleManager.draw();
-    }
-
-    function changeAudioMusic() {
-        toggleMute();
-        currentAudioMusic++;
-        if (currentAudioMusic > audioMusic.length - 1) {
-            currentAudioMusic -= 3;
-        }
-        setAudioSource(currentAudioMusic);
-        audioMusic[currentAudioMusic].start(0);
-    }
-
-    function toggleMute() {
-        if (audioMusic[currentAudioMusic].playbackState === 2) {
-            audioMusic[currentAudioMusic].stop(0);
-        } else {
-            setAudioSource(currentAudioMusic);
-            audioMusic[currentAudioMusic].start(0);
-        }
     }
 
     function special () {
