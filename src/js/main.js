@@ -34,8 +34,9 @@ var game = ( function () {
             down: 40,
             rotateLeft: 65, // A
             rotateRight: 68, // D
-            fire: 32,     // Spacebar
-            fire2: 17,    // Ctrl
+            fire: 88,     // X
+            fire2: 67,    // C
+            focus: 90, // Z
             speedUp: 34,  // Av Pag
             speedDown: 33, // Re Pag
             toggleMusic: 84, // T, toggle music
@@ -81,12 +82,12 @@ var game = ( function () {
         audioCtx = new window.AudioContext();
 
         // Audio stuff
-        audioBuffer = new BufferLoader(audioCtx, [
-            'Music/MP3/16-bits-TFIV-Stand-Up-Against-Myself.mp3',
-            'Music/MP3/32-bits-TFV-Steel-Of-Destiny.mp3',
-            'Music/MP3/128-bits-Ikaruga-Ideal.mp3'
-        ], createAudioSources);
-        audioBuffer.load();
+        // audioBuffer = new BufferLoader(audioCtx, [
+        //     'Music/MP3/16-bits-TFIV-Stand-Up-Against-Myself.mp3',
+        //     'Music/MP3/32-bits-TFV-Steel-Of-Destiny.mp3',
+        //     'Music/MP3/128-bits-Ikaruga-Ideal.mp3'
+        // ], createAudioSources);
+        // audioBuffer.load();
 
         setTimeout(function() {
             // Load resources
@@ -166,12 +167,11 @@ var game = ( function () {
 
     function Player ( player ) {
         player = new Image();
-        player.src = 'images/ship-2.png';
+        player.src = 'images/ship.png';
         player.posX = 30; // Dedault X position
         player.posY = (canvas.height / 2) - (player.height / 2); // Def Y pos
         player.centerX = player.posX + ( player.width / 2 );
         player.centerY = player.posY + ( player.height / 2 );
-        player.speed = 5;
         player.rotate = 0;
         player.isBombing = false;
 
@@ -186,6 +186,17 @@ var game = ( function () {
                 currentTime = new Date().getTime();
             }
         };
+
+        player.focusOn = function () {
+            player.speed = 3;
+            player.src = 'images/ship-focused.png';
+        }
+
+        player.focusOff = function () {
+            player.speed = 7;
+            player.src = 'images/ship.png';
+        }
+
         return player;
     }
 
@@ -307,6 +318,12 @@ var game = ( function () {
     }
 
     function playerAction() {
+        if (keyPressed.focus) {
+            player.focusOn();
+        } else {
+            player.focusOff();
+        }
+
         if (keyPressed.up && player.posY > ( player.height / 2 ) ) {
             playerUp();
         }
@@ -331,6 +348,7 @@ var game = ( function () {
         if (keyPressed.fire2) {
             bomb();
         }
+
         if (keyPressed.speedUp && bgSpeed < 10) {
             bgSpeed += 1;
             console.log(bgSpeed);
@@ -372,7 +390,7 @@ var game = ( function () {
 
     function keyDown(e) {
         var key = (window.event ? e.keyCode : e.which);
-        for (var inkey in keyMap) {
+        for ( var inkey in keyMap ) {
             if (key === keyMap[inkey]) {
                 e.preventDefault();
                 keyPressed[inkey] = true;
