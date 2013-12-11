@@ -183,8 +183,7 @@ var game = ( function () {
 
         player.fire = function() {
             if (nextShootTime < currentTime || currentTime === 0) {
-                var shot = new Shot(this, player.posX + 45,
-                    player.posY + 23, 5);
+                var shot = new Shot( this, player.posX, player.posY, player.rotate, 5 );
                 shot.add();
                 currentTime += shotDelay;
                 nextShootTime = currentTime + shotDelay;
@@ -206,11 +205,12 @@ var game = ( function () {
         return player;
     }
 
-    function Shot(shot, _x, _y, _speed) {
+    function Shot(shot, _x, _y, _direction, _speed) {
         shot = new Image();
         shot.src = 'images/shot.png'; //12x12
         shot.posX = _x;
         shot.posY = _y;
+        shot.direction = _direction * to_radians;
         shot.speed = _speed;
         shot.id = 0;
         shot.time = new Date().getTime();
@@ -317,10 +317,12 @@ var game = ( function () {
 
     function rotateLeft () {
         player.rotate -= 5;
+        if ( player.rotate <= -360 ) player.rotate = 0;
     }
 
     function rotateRight () {
         player.rotate += 5;
+        if ( player.rotate >= 360 ) player.rotate = 0;
     }
 
     function playerAction() {
@@ -566,6 +568,7 @@ var game = ( function () {
       }
     }
 
+
     function update() {
         scrollBackground( [ {
             source: [background, background2, background3/*, background4*/],
@@ -586,7 +589,6 @@ var game = ( function () {
 
 
         renderImage( player, bufferctx, player.posX, player.posY, player.rotate );
-        // renderImage( enemy, bufferctx, enemy.posX, enemy.posY, player.rotate );
 
         // bufferctx.drawImage(player, player.posX, player.posY);
         bufferctx.drawImage(enemy, enemy.posX, enemy.posY);
@@ -594,13 +596,15 @@ var game = ( function () {
         ( shots.length > 0 ) && shots.forEach( function ( shot, index ) {
             shot.id = index;
             if ( checkCollisions( shot ) ) {
-                if ( shot.posX <= canvas.width ) {
-                    shot.posX += shot.speed;
-                    shot.posY += shot.speed;
-                    renderImage( shot, bufferctx, shot.posX, shot.posY, player.rotate );
-                } else {
+                shot.posX += Math.cos( shot.direction ) * shot.speed;
+                shot.posY += Math.sin( shot.direction ) * shot.speed;
+
+                // Remove if offcanvas
+                if ( shot.posX < 0 || shot.posY < 0 || shot.posX > canvas.width || shot.posY > canvas.height ) {
                     shot.del( parseInt( shot.id, 10 ) );
                 }
+
+                bufferctx.drawImage( shot, shot.posX, shot.posY);
             }
         } );
         playerAction();
