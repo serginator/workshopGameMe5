@@ -128,8 +128,11 @@ var game = ( function () {
         player.src = 'images/ship.png';
         player.posX = 100; // Dedault X position
         player.posY = (canvas.height / 2) - (player.height / 2); // Def Y pos
+        player.centerX = player.posX + ( player.width / 2 );
+        player.centerY = player.posY + ( player.height / 2 );
         player.speed = 5;
         player.rotate = 0;
+        player.isBombing = false;
 
         player.fire = function() {
             if (nextShootTime < currentTime || currentTime === 0) {
@@ -263,18 +266,16 @@ var game = ( function () {
     }
 
     function playerAction() {
-        if (keyPressed.up && player.posY > 5) {
+        if (keyPressed.up && player.posY > ( player.height / 2 ) ) {
             playerUp();
         }
-        if (keyPressed.down && player.posY <
-            (canvas.height - player.height - 5)) {
+        if (keyPressed.down && player.posY < ( canvas.height - player.height / 2 ) ) {
             player.posY += player.speed;
         }
-        if (keyPressed.left && player.posX > 5) {
+        if (keyPressed.left && player.posX > ( player.width / 2 ) ) {
             player.posX -= player.speed;
         }
-        if (keyPressed.right && player.posX <
-            (canvas.width - player.width - 5)) {
+        if (keyPressed.right && player.posX < ( canvas.width - player.width / 2 ) ) {
             player.posX += player.speed;
         }
         if (keyPressed.rotateLeft) {
@@ -285,6 +286,9 @@ var game = ( function () {
         }
         if (keyPressed.fire) {
             player.fire();
+        }
+        if (keyPressed.fire2) {
+            bomb();
         }
         if (keyPressed.speedUp && bgSpeed < 10) {
             bgSpeed += 1;
@@ -334,6 +338,148 @@ var game = ( function () {
     function draw() {
         // renderImage( buffer, 300, 300, 120 );
         ctx.drawImage(buffer, 0, 0);
+    }
+
+    function bomb () {
+        if ( player.isBombing ) {
+            return;
+        }
+
+        player.isBombing = true;
+
+        var ctx = bufferctx,
+            dropCount = 3,
+            drops = [],
+            nextAdd = -1000000,
+            maxVelocity = .1,
+            width = canvas.width * 1.5,
+            height = canvas.height * 1.5,
+            addDrop = null;
+
+        function rand ( max, min ) {
+            min = min || 0;
+            return Math.floor( Math.random() * ( max - min ) ) + min;
+        }
+
+        function gradient ( from,to ) {
+            var grd = ctx.createLinearGradient( 0, 0, canvas.width, canvas.height );
+            grd.addColorStop( 0, from );
+            grd.addColorStop( 1, to );
+            return grd;
+        }
+
+        var gradients = [
+            gradient( 'rgb( 142, 214, 255 )', 'rgb( 179, 76, 0 )' )
+        ];
+
+        function compact( array ) {
+            var index = -1,
+                length = array ? array.length : 0,
+                resIndex = 0,
+                result = [];
+
+            while ( ++index < length ) {
+                var value = array[ index ];
+                if ( value ) {
+                    result[ resIndex++ ] = value;
+                }
+            }
+            return result;
+        }
+
+        function updateDrops ( tm ) {
+
+            if ( !addDrop && ( tm < nextAdd ) )
+                return;
+
+            var index = -1;
+
+            nextAdd = tm + 400;
+
+            if ( !tm ) {
+                addDrop = null;
+            }
+
+            // remove the nulls
+            drops = compact( drops );
+            if ( addDrop ) {
+                while ( ++index < dropCount ) {
+                    var x = addDrop.x,
+                        y = addDrop.y;
+
+                    if ( dropCount > 1 ) {
+                        x += rand( 200 );
+                        y += rand( 200 );
+                    }
+
+                    drops.push( {
+                        x: Math.ceil( x ),
+                        y: Math.ceil( y ),
+                        start: tm,
+                        vx: Math.random() * maxVelocity * 2 - maxVelocity,
+                        vy: Math.random() * maxVelocity * 2 - maxVelocity,
+                        g: rand( gradients.length ),
+                        r: canvas.width,
+                        speed: 4
+                    } );
+                }
+                addDrop = null;
+            }
+        }
+
+        function renderDraw ( tm ) {
+            // clear the field
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = 'white';
+            ctx.fillRect( 0, 0, canvas.width, canvas.height );
+
+            // update the drops
+            updateDrops( tm );
+
+            // draw the drops
+            drops.forEach( function ( drop, i ) {
+            if ( drop ) {
+                var erase = drawDrop( drop, tm, ctx, gradients[ 0 ] );
+                if ( erase )
+                    drops[ i ] = null;
+                }
+            } );
+
+            if ( ! drops.length ) {
+                player.isBombing = false;
+            } else {
+                requestAnimationFrame( renderDraw );
+            }
+        };
+
+
+        function drawDrop ( drop, tm, ctx, grd ) {
+            var r = ( ( tm - drop.start ) / drop.speed );
+            if ( r > ( drop.r * 0.8 ) )
+                return true;
+
+            drop.x += drop.vx;
+            drop.y += drop.vy;
+
+            ctx.globalAlpha = Math.max(0,(1-(r/drop.r)))*1;
+            ctx.strokeStyle = grd;
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.arc( ( drop.x / width ) * canvas.width, ( drop.y / height ) * canvas.height, r, 0, 2 * Math.PI, false );
+            ctx.stroke();
+            ctx.lineWidth = 0;
+            ctx.fill();
+        }
+
+        for ( var i=-10000; i < 0; i += 100 )
+          updateDrops( i );
+
+      requestAnimationFrame( renderDraw );
+
+      addDrop = {
+        x: player.posX + ( player.width ),
+        y: player.posY + ( player.height )
+      }
     }
 
     function update() {
