@@ -628,8 +628,7 @@ var game = ( function () {
     }
 
     function special () {
-        console.log( 'special' );
-        // posX, posY, size, area, life, speed, gravity
+        // Parametros del particleManager: posX, posY, size, area, life, speed, gravity
         particleManager.createExplosion( player.posX, player.posY, 60, 5, 70, 3, 0 );
     }
 
