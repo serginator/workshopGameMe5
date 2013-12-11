@@ -1,2 +1,6 @@
 node_modules
 reports
+
+#stuff from jetbrains
+.idea
+atlassian-ide-plugin.xml

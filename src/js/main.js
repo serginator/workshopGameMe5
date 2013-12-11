@@ -20,7 +20,11 @@ var game = ( function () {
 
     // Global vars
     var canvas, ctx, buffer, bufferctx,
-        bgMain, bgMain2, bgMain3, bgMain4, bgSpeed = 2,
+        background, background2, background3, background4,
+        foreground, foreground2, foreground3, foreground4,
+        starfield, starfield2,
+        particleManager, fireParticle,
+        bgSpeed = 2,
         to_radians = Math.PI / 180,
         shots = [],      //Array of shots
         keyPressed = {},
@@ -31,12 +35,13 @@ var game = ( function () {
             down: 40,
             rotateLeft: 65, // A
             rotateRight: 68, // D
-            fire: 32,     // Spacebar
-            fire2: 17,    // Ctrl
+            fire: 88,     // X
+            fire2: 67,    // C
+            focus: 90, // Z
             speedUp: 34,  // Av Pag
             speedDown: 33, // Re Pag
             toggleMusic: 84, // T, toggle music
-            bombs: 98, // B, bombs
+            special: 32, // Space, bombs
             lshift: 304, // Left shift, slow down
             mute: 77 // m key
         },
@@ -74,6 +79,11 @@ var game = ( function () {
         ctx.textBaseline = 'bottom';
         ctx.fillText('Loading...', buffer.width - 200, buffer.height - 50);
 
+        // Particle System
+        fireParticle = new Image;
+        fireParticle.src = "images/fire.png";
+        particleManager = new ParticleManager( bufferctx );
+
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         audioCtx = new window.AudioContext();
 
@@ -88,25 +98,47 @@ var game = ( function () {
         setTimeout(function() {
             // Load resources
             // Background pattern
-            bgMain = new Image();
-            bgMain.src = 'images/starfield-1.jpg';
-            bgMain.posX = bgMain.width;
-            bgMain.posY = -bgMain.height;
+            background = new Image();
+            background.src = 'images/background-1.jpg';
+            background.posX = 0;
 
-            bgMain2 = new Image();
-            bgMain2.src = 'images/starfield-1.jpg';
-            bgMain2.posX = 0;
-            bgMain2.posY = 0;
+            background2 = new Image();
+            background2.src = 'images/background-2.jpg';
+            background2.posX = background.width;
 
-            bgMain3 = new Image();
-            bgMain3.src = 'images/starfield-3.png';
-            bgMain3.posX = bgMain3.width;
-            bgMain3.posY = -bgMain3.height;
+            background3 = new Image();
+            background3.src = 'images/background-3.jpg';
+            background3.posX = background.width * 2;
 
-            bgMain4 = new Image();
-            bgMain4.src = 'images/starfield-3.png';
-            bgMain4.posX = 0;
-            bgMain4.posY = 0;
+            background4 = new Image();
+            background4.src = 'images/background-4.jpg';
+            background4.posX = background.width * 3;
+
+            foreground = new Image();
+            foreground.src = 'images/foreground-1.png';
+            foreground.posX = 0;
+
+            foreground2 = new Image();
+            foreground2.src = 'images/foreground-2.png';
+            foreground2.posX = foreground.width;
+
+            foreground3 = new Image();
+            foreground3.src = 'images/foreground-3.png';
+            foreground3.posX = foreground.width * 2;
+
+            foreground4 = new Image();
+            foreground4.src = 'images/foreground-4.png';
+            foreground4.posX = foreground.width * 3;
+
+            starfield = new Image();
+            starfield.src = 'images/starfield-2.png';
+            starfield.posX = 0;
+
+            starfield2 = new Image();
+            starfield2.src = 'images/starfield-2.png';
+            starfield2.posX = starfield.width;
+
+            currentAudioMusic = 0;
 
             player = new Player();
             enemy = new Enemy();
@@ -115,8 +147,6 @@ var game = ( function () {
             addListener(document, 'keydown', keyDown);
             addListener(document, 'keyup', keyUp);
 
-            currentAudioMusic = 0;
-
             // Gameloop
             var anim = function() {
                 loop();
@@ -124,7 +154,6 @@ var game = ( function () {
             };
             anim();
         }, 10000);
-
     }
 
     function createAudioSources(list) {
@@ -144,16 +173,17 @@ var game = ( function () {
 
     function Player ( player ) {
         player = new Image();
-        player.src = 'images/ship-2.png';
+        player.src = 'images/ship.png';
         player.posX = 30; // Dedault X position
         player.posY = (canvas.height / 2) - (player.height / 2); // Def Y pos
-        player.speed = 5;
+        player.centerX = player.posX + ( player.width / 2 );
+        player.centerY = player.posY + ( player.height / 2 );
         player.rotate = 0;
+        player.isBombing = false;
 
         player.fire = function() {
             if (nextShootTime < currentTime || currentTime === 0) {
-                var shot = new Shot(this, player.posX + 45,
-                    player.posY + 23, 5);
+                var shot = new Shot( this, player.posX, player.posY, player.rotate, 5 );
                 shot.add();
                 currentTime += shotDelay;
                 nextShootTime = currentTime + shotDelay;
@@ -161,14 +191,26 @@ var game = ( function () {
                 currentTime = new Date().getTime();
             }
         };
+
+        player.focusOn = function () {
+            player.speed = 3;
+            player.src = 'images/ship-focused.png';
+        }
+
+        player.focusOff = function () {
+            player.speed = 7;
+            player.src = 'images/ship.png';
+        }
+
         return player;
     }
 
-    function Shot(shot, _x, _y, _speed) {
+    function Shot(shot, _x, _y, _direction, _speed) {
         shot = new Image();
         shot.src = 'images/shot.png'; //12x12
         shot.posX = _x;
         shot.posY = _y;
+        shot.direction = _direction * to_radians;
         shot.speed = _speed;
         shot.id = 0;
         shot.time = new Date().getTime();
@@ -183,7 +225,7 @@ var game = ( function () {
 
     function Enemy(enemy, _x, _y) {
         enemy = new Image();
-        enemy.src = 'images/friday13.png'; //128x128
+        enemy.src = 'images/boss.png'; //128x128
         enemy.posX = canvas.width - enemy.width;
         enemy.posY = canvas.height / 2 - enemy.width / 2;
         enemy.life = 5; //5 hits
@@ -223,10 +265,18 @@ var game = ( function () {
                 orientation: 'horizontal',
                 moveTo: 'right'
             },
-            index = layers.source.length,
-            axis, magnitude, displace, calculateNewMove, newPosition;
+            originalLayersLength = layers.source.length,
+            index, axis, magnitude, displace, calculateNewMove, newPosition;
 
+            if ( layers.mirrorAtEnd ) {
+                var mirror = background4;
+
+                layers.source.push( mirror );
+            }
+
+            index = layers.source.length;
             extend( settings, layers );
+
             settings.speed = layers.speed ? bgSpeed * layers.speed : bgSpeed;
 
             while ( index-- ) {
@@ -239,7 +289,7 @@ var game = ( function () {
                     : settings.source[index][ 'pos' + axis ] += settings.speed;
 
                 calculateNewMove = ( displace === 'positive' )
-                    ? settings.source[index][ 'pos' + axis ] > -( settings.source[ index ][ magnitude ] )
+                    ? settings.source[index][ 'pos' + axis ] > -( settings.source[ index ][ magnitude ] * ( originalLayersLength - 1 ) )
                     : settings.source[index][ 'pos' + axis ] < settings.source[ index ][ magnitude ];
 
                 if ( calculateNewMove ) {
@@ -267,25 +317,31 @@ var game = ( function () {
 
     function rotateLeft () {
         player.rotate -= 5;
+        if ( player.rotate <= -360 ) player.rotate = 0;
     }
 
     function rotateRight () {
         player.rotate += 5;
+        if ( player.rotate >= 360 ) player.rotate = 0;
     }
 
     function playerAction() {
-        if (keyPressed.up && player.posY > 5) {
+        if (keyPressed.focus) {
+            player.focusOn();
+        } else {
+            player.focusOff();
+        }
+
+        if (keyPressed.up && player.posY > ( player.height / 2 ) ) {
             playerUp();
         }
-        if (keyPressed.down && player.posY <
-            (canvas.height - player.height - 5)) {
+        if (keyPressed.down && player.posY < ( canvas.height - player.height / 2 ) ) {
             player.posY += player.speed;
         }
-        if (keyPressed.left && player.posX > 5) {
+        if (keyPressed.left && player.posX > ( player.width / 2 ) ) {
             player.posX -= player.speed;
         }
-        if (keyPressed.right && player.posX <
-            (canvas.width - player.width - 5)) {
+        if (keyPressed.right && player.posX < ( canvas.width - player.width / 2 ) ) {
             player.posX += player.speed;
         }
         if (keyPressed.rotateLeft) {
@@ -296,6 +352,12 @@ var game = ( function () {
         }
         if (keyPressed.fire) {
             player.fire();
+        }
+        if (keyPressed.fire2) {
+            bomb();
+        }
+        if (keyPressed.special) {
+            special();
         }
         if (keyPressed.speedUp && bgSpeed < 10) {
             bgSpeed += 1;
@@ -338,7 +400,7 @@ var game = ( function () {
 
     function keyDown(e) {
         var key = (window.event ? e.keyCode : e.which);
-        for (var inkey in keyMap) {
+        for ( var inkey in keyMap ) {
             if (key === keyMap[inkey]) {
                 e.preventDefault();
                 keyPressed[inkey] = true;
@@ -360,39 +422,194 @@ var game = ( function () {
     }
 
     function draw() {
+        // renderImage( buffer, 300, 300, 120 );
         ctx.drawImage(buffer, 0, 0);
     }
 
-    function update() {
-        scrollBackground( [ {
-            source: [bgMain, bgMain2],
-            orientation: 'vertical',
-            moveTo: 'up'
-        }, {
-            source: [bgMain3, bgMain4],
-            speed: 3,
-            orientation: 'vertical',
-            moveTo: 'down'
-        } ] );
+    function bomb () {
+        if ( player.isBombing ) {
+            return;
+        }
 
-        renderImage( player, bufferctx, player.posX, player.posY, player.rotate ); // hola
-        bufferctx.drawImage(enemy, enemy.posX, enemy.posY);
+        player.isBombing = true;
 
-        for (var x = 0, y = shots.length; x < y; x++) {
-            var shot = shots[x];
-            if (shot) {
-                shot.id = x;
-                if (checkCollisions(shot)) {
-                    if (shot.posX <= canvas.width) {
-                        shot.posX += shot.speed;
-                        bufferctx.drawImage(shot, shot.posX, shot.posY);
-                    } else {
-                        shot.del(parseInt(shot.id, 10));
-                    }
+        var ctx = bufferctx,
+            dropCount = 3,
+            drops = [],
+            nextAdd = -1000000,
+            maxVelocity = .1,
+            width = canvas.width * 1.5,
+            height = canvas.height * 1.5,
+            addDrop = null;
+
+        function rand ( max, min ) {
+            min = min || 0;
+            return Math.floor( Math.random() * ( max - min ) ) + min;
+        }
+
+        function gradient ( from,to ) {
+            var grd = ctx.createLinearGradient( 0, 0, canvas.width, canvas.height );
+            grd.addColorStop( 0, from );
+            grd.addColorStop( 1, to );
+            return grd;
+        }
+
+        var gradients = [
+            gradient( 'rgb( 142, 214, 255 )', 'rgb( 179, 76, 0 )' )
+        ];
+
+        function compact( array ) {
+            var index = -1,
+                length = array ? array.length : 0,
+                resIndex = 0,
+                result = [];
+
+            while ( ++index < length ) {
+                var value = array[ index ];
+                if ( value ) {
+                    result[ resIndex++ ] = value;
                 }
             }
+            return result;
         }
+
+        function updateDrops ( tm ) {
+
+            if ( !addDrop && ( tm < nextAdd ) )
+                return;
+
+            var index = -1;
+
+            nextAdd = tm + 400;
+
+            if ( !tm ) {
+                addDrop = null;
+            }
+
+            // remove the nulls
+            drops = compact( drops );
+            if ( addDrop ) {
+                while ( ++index < dropCount ) {
+                    var x = addDrop.x,
+                        y = addDrop.y;
+
+                    if ( dropCount > 1 ) {
+                        x += rand( 200 );
+                        y += rand( 200 );
+                    }
+
+                    drops.push( {
+                        x: Math.ceil( x ),
+                        y: Math.ceil( y ),
+                        start: tm,
+                        vx: Math.random() * maxVelocity * 2 - maxVelocity,
+                        vy: Math.random() * maxVelocity * 2 - maxVelocity,
+                        g: rand( gradients.length ),
+                        r: canvas.width,
+                        speed: 4
+                    } );
+                }
+                addDrop = null;
+            }
+        }
+
+        function renderDraw ( tm ) {
+            // clear the field
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = 'white';
+            ctx.fillRect( 0, 0, canvas.width, canvas.height );
+
+            // update the drops
+            updateDrops( tm );
+
+            // draw the drops
+            drops.forEach( function ( drop, i ) {
+            if ( drop ) {
+                var erase = drawDrop( drop, tm, ctx, gradients[ 0 ] );
+                if ( erase )
+                    drops[ i ] = null;
+                }
+            } );
+
+            if ( ! drops.length ) {
+                player.isBombing = false;
+            } else {
+                requestAnimationFrame( renderDraw );
+            }
+        };
+
+
+        function drawDrop ( drop, tm, ctx, grd ) {
+            var r = ( ( tm - drop.start ) / drop.speed );
+            if ( r > ( drop.r * 0.8 ) )
+                return true;
+
+            drop.x += drop.vx;
+            drop.y += drop.vy;
+
+            ctx.globalAlpha = Math.max(0,(1-(r/drop.r)))*1;
+            ctx.strokeStyle = grd;
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.arc( ( drop.x / width ) * canvas.width, ( drop.y / height ) * canvas.height, r, 0, 2 * Math.PI, false );
+            ctx.stroke();
+            ctx.lineWidth = 0;
+            ctx.fill();
+        }
+
+        for ( var i=-10000; i < 0; i += 100 )
+          updateDrops( i );
+
+      requestAnimationFrame( renderDraw );
+
+      addDrop = {
+        x: player.posX + ( player.width ),
+        y: player.posY + ( player.height )
+      }
+    }
+
+
+    function update() {
+        scrollBackground( [ {
+            source: [background, background2, background3/*, background4*/],
+            orientation: 'horizontal',
+            moveTo: 'left',
+            speed: 0.5
+        }, {
+            source: [foreground, foreground2, foreground3, foreground4],
+            speed: 3,
+            orientation: 'horizontal',
+            moveTo: 'left'
+        }, {
+            source: [starfield, starfield2],
+            speed: 5,
+            orientation: 'horizontal',
+            moveTo: 'left'
+        } ] );
+
+
+        renderImage( player, bufferctx, player.posX, player.posY, player.rotate );
+
+        // bufferctx.drawImage(player, player.posX, player.posY);
+        bufferctx.drawImage(enemy, enemy.posX, enemy.posY);
+
+        ( shots.length > 0 ) && shots.forEach( function ( shot, index ) {
+            shot.id = index;
+            if ( checkCollisions( shot ) ) {
+                shot.posX += Math.cos( shot.direction ) * shot.speed;
+                shot.posY += Math.sin( shot.direction ) * shot.speed;
+
+                // Remove if offcanvas
+                if ( shot.posX < 0 || shot.posY < 0 || shot.posX > canvas.width || shot.posY > canvas.height ) {
+                    shot.del( parseInt( shot.id, 10 ) );
+                }
+
+                bufferctx.drawImage( shot, shot.posX, shot.posY);
+            }
+        } );
         playerAction();
+
+        particleManager.draw();
     }
 
     function changeAudioMusic() {
@@ -411,6 +628,40 @@ var game = ( function () {
         } else {
             setAudioSource(currentAudioMusic);
             audioMusic[currentAudioMusic].start(0);
+        }
+    }
+
+    function special () {
+        // Parametros del particleManager: posX, posY, size, area, life, speed, gravity
+        particleManager.createExplosion( player.posX, player.posY, 60, 5, 70, 3, 0 );
+    }
+
+    function ParticleManager(n) {
+        var t = [],
+            i = n;
+        this.draw = function () {
+            for (var r = [], n = t.length - 1; n >= 0; n--) t[n].moves++, t[n].x += t[n].xunits, t[n].y += t[n].yunits + t[n].gravity * t[n].moves, t[n].moves < t[n].life && (r.push(t[n]), i.globalAlpha = 5 / t[n].moves, i.drawImage(fireParticle, Math.floor(t[n].x), Math.floor(t[n].y), t[n].width, t[n].height), i.globalAlpha = 1);
+            t = r
+        }, this.createExplosion = function (n, i, r, u, f, e, o) {
+            var e, s, h;
+            for (n = n - r * .5, i = i - r * .5, e = r * e * .01, s = 1; s < u; s++)
+                for (h = 0; h < 10 * s; h++) t.push(particle(n, i, r, r, s * e, o, f))
+        }
+    }
+    var particle = function (n, t, i, r, u, f, e) {
+        var s = Math.floor(Math.random() * 360),
+            o = s * Math.PI / 180;
+        return {
+            x: n,
+            y: t,
+            width: i,
+            height: r,
+            speed: u,
+            life: e,
+            gravity: f,
+            xunits: Math.cos(o) * u,
+            yunits: Math.sin(o) * u,
+            moves: 0
         }
     }
 
