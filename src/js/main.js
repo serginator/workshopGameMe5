@@ -127,7 +127,7 @@ var game = ( function () {
     }
 
     function createAudioSources(list) {
-        audioMusic = []
+        audioMusic = [];
         for (var i = 0; i < 3; i++) {
             setAudioSource(i);
         }
@@ -147,6 +147,7 @@ var game = ( function () {
         player.posX = 30; // Dedault X position
         player.posY = (canvas.height / 2) - (player.height / 2); // Def Y pos
         player.speed = 5;
+        player.rotate = 0;
 
         player.fire = function() {
             if (nextShootTime < currentTime || currentTime === 0) {
@@ -200,7 +201,7 @@ var game = ( function () {
             (enemy.posX + enemy.width)) {
             if (shot.posY >= enemy.posY && shot.posY <=
                 (enemy.posY + enemy.height)) {
-                var aux = (enemy.life > 1) ? enemy.life-- : enemy.backToLife();
+                (enemy.life > 1) ? enemy.life-- : enemy.backToLife();
                 shot.del(parseInt(shot.id, 10));
                 return false;
             }
@@ -251,7 +252,7 @@ var game = ( function () {
         } );
     };
 
-    function rotateElement ( image, ctxTmp, x, y, angle ) {
+    function renderImage ( image, ctxTmp, x, y, angle ) {
         ctxTmp.save();
         ctxTmp.translate( x, y );
         ctxTmp.rotate( angle * to_radians );
@@ -264,11 +265,11 @@ var game = ( function () {
     }
 
     function rotateLeft () {
-        // rotateElement( player, player.posX, player.posY, 90 );
+        player.rotate -= 5;
     }
 
     function rotateRight () {
-        // rotateElement( player, player.posX, player.posY, -90 );
+        player.rotate += 5;
     }
 
     function playerAction() {
@@ -366,7 +367,7 @@ var game = ( function () {
             moveTo: 'down'
         } ] );
 
-        bufferctx.drawImage(player, player.posX, player.posY);
+        renderImage( player, bufferctx, player.posX, player.posY, player.rotate ); // hola
         bufferctx.drawImage(enemy, enemy.posX, enemy.posY);
 
         for (var x = 0, y = shots.length; x < y; x++) {
@@ -390,7 +391,7 @@ var game = ( function () {
         audioMusic[currentAudioMusic].stop(0);
         currentAudioMusic++;
         if (currentAudioMusic > audioMusic.length - 1) {
-            currentAudioMusic -= 3
+            currentAudioMusic -= 3;
         }
         setAudioSource(currentAudioMusic);
         audioMusic[currentAudioMusic].start(0);
@@ -399,6 +400,6 @@ var game = ( function () {
     // Public Methods
     return {
         init: init
-    }
+    };
 
 } ) ();
