@@ -23,6 +23,7 @@ var game = ( function () {
         background, background2, background3, background4,
         foreground, foreground2, foreground3, foreground4,
         starfield, starfield2,
+        particleManager, fireParticle,
         bgSpeed = 2,
         to_radians = Math.PI / 180,
         shots = [],      //Array of shots
@@ -40,7 +41,7 @@ var game = ( function () {
             speedUp: 34,  // Av Pag
             speedDown: 33, // Re Pag
             toggleMusic: 84, // T, toggle music
-            bombs: 98, // B, bombs
+            special: 32, // B, bombs
             lshift: 304, // Left shift, slow down
             mute: 77 // m key
         },
@@ -77,6 +78,11 @@ var game = ( function () {
         ctx.font = 'italic 25px arial';
         ctx.textBaseline = 'bottom';
         ctx.fillText('Loading...', buffer.width - 200, buffer.height - 50);
+
+        // Particle System
+        fireParticle = new Image;
+        fireParticle.src = "images/fire.png";
+        particleManager = new ParticleManager( bufferctx );
 
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         audioCtx = new window.AudioContext();
@@ -348,7 +354,9 @@ var game = ( function () {
         if (keyPressed.fire2) {
             bomb();
         }
-
+        if (keyPressed.special) {
+            special();
+        }
         if (keyPressed.speedUp && bgSpeed < 10) {
             bgSpeed += 1;
             console.log(bgSpeed);
@@ -596,6 +604,8 @@ var game = ( function () {
             }
         } );
         playerAction();
+
+        particleManager.draw();
     }
 
     function changeAudioMusic() {
@@ -614,6 +624,41 @@ var game = ( function () {
         } else {
             setAudioSource(currentAudioMusic);
             audioMusic[currentAudioMusic].start(0);
+        }
+    }
+
+    function special () {
+        console.log( 'special' );
+        // posX, posY, size, area, life, speed, gravity
+        particleManager.createExplosion( player.posX, player.posY, 60, 5, 70, 3, 0 );
+    }
+
+    function ParticleManager(n) {
+        var t = [],
+            i = n;
+        this.draw = function () {
+            for (var r = [], n = t.length - 1; n >= 0; n--) t[n].moves++, t[n].x += t[n].xunits, t[n].y += t[n].yunits + t[n].gravity * t[n].moves, t[n].moves < t[n].life && (r.push(t[n]), i.globalAlpha = 5 / t[n].moves, i.drawImage(fireParticle, Math.floor(t[n].x), Math.floor(t[n].y), t[n].width, t[n].height), i.globalAlpha = 1);
+            t = r
+        }, this.createExplosion = function (n, i, r, u, f, e, o) {
+            var e, s, h;
+            for (n = n - r * .5, i = i - r * .5, e = r * e * .01, s = 1; s < u; s++)
+                for (h = 0; h < 10 * s; h++) t.push(particle(n, i, r, r, s * e, o, f))
+        }
+    }
+    var particle = function (n, t, i, r, u, f, e) {
+        var s = Math.floor(Math.random() * 360),
+            o = s * Math.PI / 180;
+        return {
+            x: n,
+            y: t,
+            width: i,
+            height: r,
+            speed: u,
+            life: e,
+            gravity: f,
+            xunits: Math.cos(o) * u,
+            yunits: Math.sin(o) * u,
+            moves: 0
         }
     }
 
