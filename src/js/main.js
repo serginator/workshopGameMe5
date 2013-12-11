@@ -20,7 +20,10 @@ var game = ( function () {
 
     // Global vars
     var canvas, ctx, buffer, bufferctx,
-        bgMain, bgMain2, bgMain3, bgMain4, bgSpeed = 2,
+        background, background2, background3, background4,
+        foreground, foreground2, foreground3, foreground4,
+        starfield, starfield2,
+        bgSpeed = 2,
         to_radians = Math.PI / 180,
         shots = [],      //Array of shots
         keyPressed = {},
@@ -34,18 +37,12 @@ var game = ( function () {
             fire: 32,     // Spacebar
             fire2: 17,    // Ctrl
             speedUp: 34,  // Av Pag
-            speedDown: 33, // Re Pag
-            toggleMusic: 84, // T, toggle music
-            bombs: 98, // B, bombs
-            lshift: 304, // Left shift, slow down
-            mute: 77 // m key
+            speedDown: 33 // Re Pag
         },
         nextShootTime = 0,
         shotDelay = 100,
         currentTime = 0,
-        player, enemy,
-        audioCtx, audioBuffer, audioMusic, currentAudioMusic,
-        changingMusic = false;
+        player, enemy;
 
     function loop () {
         update();
@@ -69,83 +66,67 @@ var game = ( function () {
         buffer.height = canvas.height;
         bufferctx = buffer.getContext('2d');
 
-        ctx.fillStyle = '#fff';
-        ctx.font = 'italic 25px arial';
-        ctx.textBaseline = 'bottom';
-        ctx.fillText('Loading...', buffer.width - 200, buffer.height - 50);
+        // Load resources
+        // Background pattern
+        background = new Image();
+        background.src = 'images/background-1.jpg';
+        background.posX = 0;
 
-        window.AudioContext = window.AudioContext || window.webkitAudioContext;
-        audioCtx = new window.AudioContext();
+        background2 = new Image();
+        background2.src = 'images/background-2.jpg';
+        background2.posX = background.width;
 
-        // Audio stuff
-        audioBuffer = new BufferLoader(audioCtx, [
-            'Music/MP3/16-bits-TFIV-Stand-Up-Against-Myself.mp3',
-            'Music/MP3/32-bits-TFV-Steel-Of-Destiny.mp3',
-            'Music/MP3/128-bits-Ikaruga-Ideal.mp3'
-        ], createAudioSources);
-        audioBuffer.load();
+        background3 = new Image();
+        background3.src = 'images/background-3.jpg';
+        background3.posX = background.width * 2;
 
-        setTimeout(function() {
-            // Load resources
-            // Background pattern
-            bgMain = new Image();
-            bgMain.src = 'images/starfield-1.jpg';
-            bgMain.posX = bgMain.width;
-            bgMain.posY = -bgMain.height;
+        background4 = new Image();
+        background4.src = 'images/background-4.jpg';
+        background4.posX = background.width * 3;
 
-            bgMain2 = new Image();
-            bgMain2.src = 'images/starfield-1.jpg';
-            bgMain2.posX = 0;
-            bgMain2.posY = 0;
+        foreground = new Image();
+        foreground.src = 'images/foreground-1.png';
+        foreground.posX = 0;
 
-            bgMain3 = new Image();
-            bgMain3.src = 'images/starfield-3.png';
-            bgMain3.posX = bgMain3.width;
-            bgMain3.posY = -bgMain3.height;
+        foreground2 = new Image();
+        foreground2.src = 'images/foreground-2.png';
+        foreground2.posX = foreground.width;
 
-            bgMain4 = new Image();
-            bgMain4.src = 'images/starfield-3.png';
-            bgMain4.posX = 0;
-            bgMain4.posY = 0;
+        foreground3 = new Image();
+        foreground3.src = 'images/foreground-3.png';
+        foreground3.posX = foreground.width * 2;
 
-            player = new Player();
-            enemy = new Enemy();
+        foreground4 = new Image();
+        foreground4.src = 'images/foreground-4.png';
+        foreground4.posX = foreground.width * 3;
 
-            // Attach keyboard control
-            addListener(document, 'keydown', keyDown);
-            addListener(document, 'keyup', keyUp);
+        starfield = new Image();
+        starfield.src = 'images/starfield-2.png';
+        starfield.posX = 0;
 
-            currentAudioMusic = 0;
+        starfield2 = new Image();
+        starfield2.src = 'images/starfield-2.png';
+        starfield2.posX = starfield.width;
 
-            // Gameloop
-            var anim = function() {
-                loop();
-                window.requestAnimFrame(anim);
-            };
-            anim();
-        }, 10000);
+        player = new Player();
+        enemy = new Enemy();
 
-    }
+        // Attach keyboard control
+        addListener(document, 'keydown', keyDown);
+        addListener(document, 'keyup', keyUp);
 
-    function createAudioSources(list) {
-        audioMusic = [];
-        for (var i = 0; i < 3; i++) {
-            setAudioSource(i);
-        }
-        audioMusic[0].start(0);
-    }
-
-    function setAudioSource(index) {
-        audioMusic[index] = audioCtx.createBufferSource();
-            audioMusic[index].buffer = audioBuffer.bufferList[index];
-            audioMusic[index].connect(audioCtx.destination);
-            audioMusic[index].loop = true;
+        // Gameloop
+        var anim = function() {
+            loop();
+            window.requestAnimFrame(anim);
+        };
+        anim();
     }
 
     function Player ( player ) {
         player = new Image();
-        player.src = 'images/ship-2.png';
-        player.posX = 30; // Dedault X position
+        player.src = 'images/ship.png';
+        player.posX = 100; // Dedault X position
         player.posY = (canvas.height / 2) - (player.height / 2); // Def Y pos
         player.speed = 5;
         player.rotate = 0;
@@ -183,7 +164,7 @@ var game = ( function () {
 
     function Enemy(enemy, _x, _y) {
         enemy = new Image();
-        enemy.src = 'images/friday13.png'; //128x128
+        enemy.src = 'images/boss.png'; //128x128
         enemy.posX = canvas.width - enemy.width;
         enemy.posY = canvas.height / 2 - enemy.width / 2;
         enemy.life = 5; //5 hits
@@ -202,7 +183,7 @@ var game = ( function () {
             (enemy.posX + enemy.width)) {
             if (shot.posY >= enemy.posY && shot.posY <=
                 (enemy.posY + enemy.height)) {
-                (enemy.life > 1) ? enemy.life-- : enemy.backToLife();
+                var aux = (enemy.life > 1) ? enemy.life-- : enemy.backToLife();
                 shot.del(parseInt(shot.id, 10));
                 return false;
             }
@@ -223,10 +204,18 @@ var game = ( function () {
                 orientation: 'horizontal',
                 moveTo: 'right'
             },
-            index = layers.source.length,
-            axis, magnitude, displace, calculateNewMove, newPosition;
+            originalLayersLength = layers.source.length,
+            index, axis, magnitude, displace, calculateNewMove, newPosition;
 
+            if ( layers.mirrorAtEnd ) {
+                var mirror = background4;
+
+                layers.source.push( mirror );
+            }
+
+            index = layers.source.length;
             extend( settings, layers );
+
             settings.speed = layers.speed ? bgSpeed * layers.speed : bgSpeed;
 
             while ( index-- ) {
@@ -239,7 +228,7 @@ var game = ( function () {
                     : settings.source[index][ 'pos' + axis ] += settings.speed;
 
                 calculateNewMove = ( displace === 'positive' )
-                    ? settings.source[index][ 'pos' + axis ] > -( settings.source[ index ][ magnitude ] )
+                    ? settings.source[index][ 'pos' + axis ] > -( settings.source[ index ][ magnitude ] * ( originalLayersLength - 1 ) )
                     : settings.source[index][ 'pos' + axis ] < settings.source[ index ][ magnitude ];
 
                 if ( calculateNewMove ) {
@@ -305,20 +294,6 @@ var game = ( function () {
             bgSpeed -= 1;
             console.log(bgSpeed);
         }
-        if (keyPressed.toggleMusic) {
-            if (!changingMusic) {
-                changingMusic = true;
-                changeAudioMusic();
-                console.log('Changing music');
-            }
-        }
-        if (keyPressed.mute) {
-            if (!changingMusic) {
-                changingMusic = true;
-                toggleMute();
-                console.log('Mute');
-            }
-        }
     }
 
     /**
@@ -348,9 +323,6 @@ var game = ( function () {
 
     function keyUp(e) {
         var key = (window.event ? e.keyCode : e.which);
-        if (key === 84 || key == 77) {
-            changingMusic = false;
-        }
         for (var inkey in keyMap) {
             if (key === keyMap[inkey]) {
                 e.preventDefault();
@@ -360,63 +332,53 @@ var game = ( function () {
     }
 
     function draw() {
+        // renderImage( buffer, 300, 300, 120 );
         ctx.drawImage(buffer, 0, 0);
     }
 
     function update() {
         scrollBackground( [ {
-            source: [bgMain, bgMain2],
-            orientation: 'vertical',
-            moveTo: 'up'
+            source: [background, background2, background3/*, background4*/],
+            orientation: 'horizontal',
+            moveTo: 'left',
+            speed: 0.5
         }, {
-            source: [bgMain3, bgMain4],
+            source: [foreground, foreground2, foreground3, foreground4],
             speed: 3,
-            orientation: 'vertical',
-            moveTo: 'down'
+            orientation: 'horizontal',
+            moveTo: 'left'
+        }, {
+            source: [starfield, starfield2],
+            speed: 5,
+            orientation: 'horizontal',
+            moveTo: 'left'
         } ] );
 
-        renderImage( player, bufferctx, player.posX, player.posY, player.rotate ); // hola
+
+        renderImage( player, bufferctx, player.posX, player.posY, player.rotate );
+        // renderImage( enemy, bufferctx, enemy.posX, enemy.posY, player.rotate );
+
+        // bufferctx.drawImage(player, player.posX, player.posY);
         bufferctx.drawImage(enemy, enemy.posX, enemy.posY);
 
-        for (var x = 0, y = shots.length; x < y; x++) {
-            var shot = shots[x];
-            if (shot) {
-                shot.id = x;
-                if (checkCollisions(shot)) {
-                    if (shot.posX <= canvas.width) {
-                        shot.posX += shot.speed;
-                        bufferctx.drawImage(shot, shot.posX, shot.posY);
-                    } else {
-                        shot.del(parseInt(shot.id, 10));
-                    }
+        ( shots.length > 0 ) && shots.forEach( function ( shot, index ) {
+            shot.id = index;
+            if ( checkCollisions( shot ) ) {
+                if ( shot.posX <= canvas.width ) {
+                    shot.posX += shot.speed;
+                    shot.posY += shot.speed;
+                    renderImage( shot, bufferctx, shot.posX, shot.posY, player.rotate );
+                } else {
+                    shot.del( parseInt( shot.id, 10 ) );
                 }
             }
-        }
+        } );
         playerAction();
-    }
-
-    function changeAudioMusic() {
-        toggleMute();
-        currentAudioMusic++;
-        if (currentAudioMusic > audioMusic.length - 1) {
-            currentAudioMusic -= 3;
-        }
-        setAudioSource(currentAudioMusic);
-        audioMusic[currentAudioMusic].start(0);
-    }
-
-    function toggleMute() {
-        if (audioMusic[currentAudioMusic].playbackState === 2) {
-            audioMusic[currentAudioMusic].stop(0);
-        } else {
-            setAudioSource(currentAudioMusic);
-            audioMusic[currentAudioMusic].start(0);
-        }
     }
 
     // Public Methods
     return {
         init: init
-    };
+    }
 
 } ) ();
