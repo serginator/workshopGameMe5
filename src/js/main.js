@@ -37,12 +37,18 @@ var game = ( function () {
             fire: 32,     // Spacebar
             fire2: 17,    // Ctrl
             speedUp: 34,  // Av Pag
-            speedDown: 33 // Re Pag
+            speedDown: 33, // Re Pag
+            toggleMusic: 84, // T, toggle music
+            bombs: 98, // B, bombs
+            lshift: 304, // Left shift, slow down
+            mute: 77 // m key
         },
         nextShootTime = 0,
         shotDelay = 100,
         currentTime = 0,
-        player, enemy;
+        player, enemy,
+        audioCtx, audioBuffer, audioMusic, currentAudioMusic,
+        changingMusic = false;
 
     function loop () {
         update();
@@ -66,67 +72,100 @@ var game = ( function () {
         buffer.height = canvas.height;
         bufferctx = buffer.getContext('2d');
 
-        // Load resources
-        // Background pattern
-        background = new Image();
-        background.src = 'images/background-1.jpg';
-        background.posX = 0;
+		ctx.fillStyle = '#fff';
+		ctx.font = 'italic 25px arial';
+		ctx.textBaseline = 'bottom';
+		ctx.fillText('Loading...', buffer.width - 200, buffer.height - 50);
 
-        background2 = new Image();
-        background2.src = 'images/background-2.jpg';
-        background2.posX = background.width;
+		window.AudioContext = window.AudioContext || window.webkitAudioContext;
+		audioCtx = new window.AudioContext();
 
-        background3 = new Image();
-        background3.src = 'images/background-3.jpg';
-        background3.posX = background.width * 2;
+		// Audio stuff
+		audioBuffer = new BufferLoader(audioCtx, [
+			'Music/MP3/16-bits-TFIV-Stand-Up-Against-Myself.mp3',
+			'Music/MP3/32-bits-TFV-Steel-Of-Destiny.mp3',
+			'Music/MP3/128-bits-Ikaruga-Ideal.mp3'
+		], createAudioSources);
+		audioBuffer.load();
 
-        background4 = new Image();
-        background4.src = 'images/background-4.jpg';
-        background4.posX = background.width * 3;
+		setTimeout(function() {
+			// Load resources
+			// Background pattern
+			background = new Image();
+			background.src = 'images/background-1.jpg';
+			background.posX = 0;
 
-        foreground = new Image();
-        foreground.src = 'images/foreground-1.png';
-        foreground.posX = 0;
+			background2 = new Image();
+			background2.src = 'images/background-2.jpg';
+			background2.posX = background.width;
 
-        foreground2 = new Image();
-        foreground2.src = 'images/foreground-2.png';
-        foreground2.posX = foreground.width;
+			background3 = new Image();
+			background3.src = 'images/background-3.jpg';
+			background3.posX = background.width * 2;
 
-        foreground3 = new Image();
-        foreground3.src = 'images/foreground-3.png';
-        foreground3.posX = foreground.width * 2;
+			background4 = new Image();
+			background4.src = 'images/background-4.jpg';
+			background4.posX = background.width * 3;
 
-        foreground4 = new Image();
-        foreground4.src = 'images/foreground-4.png';
-        foreground4.posX = foreground.width * 3;
+			foreground = new Image();
+			foreground.src = 'images/foreground-1.png';
+			foreground.posX = 0;
 
-        starfield = new Image();
-        starfield.src = 'images/starfield-2.png';
-        starfield.posX = 0;
+			foreground2 = new Image();
+			foreground2.src = 'images/foreground-2.png';
+			foreground2.posX = foreground.width;
 
-        starfield2 = new Image();
-        starfield2.src = 'images/starfield-2.png';
-        starfield2.posX = starfield.width;
+			foreground3 = new Image();
+			foreground3.src = 'images/foreground-3.png';
+			foreground3.posX = foreground.width * 2;
 
-        player = new Player();
-        enemy = new Enemy();
+			foreground4 = new Image();
+			foreground4.src = 'images/foreground-4.png';
+			foreground4.posX = foreground.width * 3;
 
-        // Attach keyboard control
-        addListener(document, 'keydown', keyDown);
-        addListener(document, 'keyup', keyUp);
+			starfield = new Image();
+			starfield.src = 'images/starfield-2.png';
+			starfield.posX = 0;
 
-        // Gameloop
-        var anim = function() {
-            loop();
-            window.requestAnimFrame(anim);
-        };
-        anim();
+			starfield2 = new Image();
+			starfield2.src = 'images/starfield-2.png';
+			starfield2.posX = starfield.width;
+
+			player = new Player();
+			enemy = new Enemy();
+
+			// Attach keyboard control
+			addListener(document, 'keydown', keyDown);
+			addListener(document, 'keyup', keyUp);
+
+			// Gameloop
+			var anim = function() {
+				loop();
+				window.requestAnimFrame(anim);
+			};
+			anim();
+		}, 10000);
+    }
+
+    function createAudioSources(list) {
+        audioMusic = [];
+        for (var i = 0; i < 3; i++) {
+            setAudioSource(i);
+        }
+        audioMusic[0].start(0);
+    }
+
+    function setAudioSource(index) {
+        audioMusic[index] = audioCtx.createBufferSource();
+            audioMusic[index].buffer = audioBuffer.bufferList[index];
+            audioMusic[index].connect(audioCtx.destination);
+            audioMusic[index].loop = true;
     }
 
     function Player ( player ) {
         player = new Image();
-        player.src = 'images/ship.png';
-        player.posX = 100; // Dedault X position
+        player.src = 'images/ship-2.png';
+        player.posX = 30; // Dedault X position
         player.posY = (canvas.height / 2) - (player.height / 2); // Def Y pos
         player.speed = 5;
         player.rotate = 0;
@@ -183,7 +222,7 @@ var game = ( function () {
             (enemy.posX + enemy.width)) {
             if (shot.posY >= enemy.posY && shot.posY <=
                 (enemy.posY + enemy.height)) {
-                var aux = (enemy.life > 1) ? enemy.life-- : enemy.backToLife();
+                (enemy.life > 1) ? enemy.life-- : enemy.backToLife();
                 shot.del(parseInt(shot.id, 10));
                 return false;
             }
@@ -294,6 +333,20 @@ var game = ( function () {
             bgSpeed -= 1;
             console.log(bgSpeed);
         }
+        if (keyPressed.toggleMusic) {
+            if (!changingMusic) {
+                changingMusic = true;
+                changeAudioMusic();
+                console.log('Changing music');
+            }
+        }
+        if (keyPressed.mute) {
+            if (!changingMusic) {
+                changingMusic = true;
+                toggleMute();
+                console.log('Mute');
+            }
+        }
     }
 
     /**
@@ -323,6 +376,9 @@ var game = ( function () {
 
     function keyUp(e) {
         var key = (window.event ? e.keyCode : e.which);
+        if (key === 84 || key == 77) {
+            changingMusic = false;
+        }
         for (var inkey in keyMap) {
             if (key === keyMap[inkey]) {
                 e.preventDefault();
@@ -374,6 +430,25 @@ var game = ( function () {
             }
         } );
         playerAction();
+    }
+
+    function changeAudioMusic() {
+        toggleMute();
+        currentAudioMusic++;
+        if (currentAudioMusic > audioMusic.length - 1) {
+            currentAudioMusic -= 3;
+        }
+        setAudioSource(currentAudioMusic);
+        audioMusic[currentAudioMusic].start(0);
+    }
+
+    function toggleMute() {
+        if (audioMusic[currentAudioMusic].playbackState === 2) {
+            audioMusic[currentAudioMusic].stop(0);
+        } else {
+            setAudioSource(currentAudioMusic);
+            audioMusic[currentAudioMusic].start(0);
+        }
     }
 
     // Public Methods
