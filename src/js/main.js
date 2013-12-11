@@ -131,6 +131,8 @@ var game = ( function () {
             starfield2.src = 'images/starfield-2.png';
             starfield2.posX = starfield.width;
 
+            currentAudioMusic = 0;
+
             player = new Player();
             enemy = new Enemy();
 
