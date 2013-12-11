@@ -41,7 +41,7 @@ var game = ( function () {
             speedUp: 34,  // Av Pag
             speedDown: 33, // Re Pag
             toggleMusic: 84, // T, toggle music
-            special: 32, // B, bombs
+            special: 32, // Space, bombs
             lshift: 304, // Left shift, slow down
             mute: 77 // m key
         },
@@ -88,12 +88,12 @@ var game = ( function () {
         audioCtx = new window.AudioContext();
 
         // Audio stuff
-        // audioBuffer = new BufferLoader(audioCtx, [
-        //     'Music/MP3/16-bits-TFIV-Stand-Up-Against-Myself.mp3',
-        //     'Music/MP3/32-bits-TFV-Steel-Of-Destiny.mp3',
-        //     'Music/MP3/128-bits-Ikaruga-Ideal.mp3'
-        // ], createAudioSources);
-        // audioBuffer.load();
+        audioBuffer = new BufferLoader(audioCtx, [
+            'Music/MP3/16-bits-TFIV-Stand-Up-Against-Myself.mp3',
+            'Music/MP3/32-bits-TFV-Steel-Of-Destiny.mp3',
+            'Music/MP3/128-bits-Ikaruga-Ideal.mp3'
+        ], createAudioSources);
+        audioBuffer.load();
 
         setTimeout(function() {
             // Load resources
@@ -664,6 +664,6 @@ var game = ( function () {
     // Public Methods
     return {
         init: init
-    }
+    };
 
 } ) ();
