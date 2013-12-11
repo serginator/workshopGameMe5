@@ -35,9 +35,10 @@ var game = ( function () {
             fire2: 17,    // Ctrl
             speedUp: 34,  // Av Pag
             speedDown: 33, // Re Pag
-            t: 84, // T, toggle music
-            b: 98, // B, bombs
-            lshift: 304 // Left shift, slow down
+            toggleMusic: 84, // T, toggle music
+            bombs: 98, // B, bombs
+            lshift: 304, // Left shift, slow down
+            mute: 77 // m key
         },
         nextShootTime = 0,
         shotDelay = 100,
@@ -304,11 +305,18 @@ var game = ( function () {
             bgSpeed -= 1;
             console.log(bgSpeed);
         }
-        if (keyPressed.t) {
+        if (keyPressed.toggleMusic) {
             if (!changingMusic) {
                 changingMusic = true;
                 changeAudioMusic();
                 console.log('Changing music');
+            }
+        }
+        if (keyPressed.mute) {
+            if (!changingMusic) {
+                changingMusic = true;
+                toggleMute();
+                console.log('Mute');
             }
         }
     }
@@ -340,7 +348,7 @@ var game = ( function () {
 
     function keyUp(e) {
         var key = (window.event ? e.keyCode : e.which);
-        if (key === 84) {
+        if (key === 84 || key == 77) {
             changingMusic = false;
         }
         for (var inkey in keyMap) {
@@ -388,13 +396,22 @@ var game = ( function () {
     }
 
     function changeAudioMusic() {
-        audioMusic[currentAudioMusic].stop(0);
+        toggleMute();
         currentAudioMusic++;
         if (currentAudioMusic > audioMusic.length - 1) {
             currentAudioMusic -= 3;
         }
         setAudioSource(currentAudioMusic);
         audioMusic[currentAudioMusic].start(0);
+    }
+
+    function toggleMute() {
+        if (audioMusic[currentAudioMusic].playbackState === 2) {
+            audioMusic[currentAudioMusic].stop(0);
+        } else {
+            setAudioSource(currentAudioMusic);
+            audioMusic[currentAudioMusic].start(0);
+        }
     }
 
     // Public Methods
