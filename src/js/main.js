@@ -171,10 +171,7 @@ var game = ( function () {
             addListener(document, 'keydown', keyDown);
             addListener(document, 'keyup', keyUp);
 
-            for (var i = 0, n = buggersCount; i < n; i++) {
-                var b = new Bugger();
-                b.add();
-            }
+            createBuggers();
 
             // Gameloop
             var anim = function() {
@@ -383,17 +380,41 @@ var game = ( function () {
         return bugger;
     }
 
-    function checkCollisions(shot) {
-        if (shot.posX >= enemy.posX && shot.posX <=
-            (enemy.posX + enemy.width)) {
-            if (shot.posY >= enemy.posY && shot.posY <=
-                (enemy.posY + enemy.height)) {
-                (enemy.life > 1) ? enemy.life-- : enemy.backToLife();
-                shot.del(parseInt(shot.id, 10));
-                return false;
+    function checkCollision(a, b, callback) {
+        if (a.posX >= b.posX && a.posX <=
+            (b.posX + b.width)) {
+            if (a.posY >= b.posY && a.posY <=
+                (b.posY + b.height)) {
+                callback();
+                return true;
             }
         }
-        return true;
+        return false;
+    }
+
+    function checkCollisionsShot(shot) {
+        return checkCollision(shot, enemy, function() {
+            (enemy.life > 1) ? enemy.life-- : enemy.backToLife();
+            shot.del(parseInt(shot.id, 10));
+        });
+    }
+
+    function checkCollisionsBugger(bugger) {
+        var ret;
+        shots.forEach(function(shot, index) {
+            ret = checkCollision(shot, bugger, function() {
+                shot.del(parseInt(shot.id, 10));
+                    bugger.del(parseInt(bugger.id, 10));
+                    // score++
+            });
+            if (ret) {
+                return true;
+            }
+        });
+        return checkCollision(bugger, player, function() {
+            // player.lifes--
+            bugger.del(parseInt(bugger.id, 10));
+        });
     }
 
     /**
@@ -715,6 +736,8 @@ var game = ( function () {
             ctx.fill();
         }
 
+        destroyBuggers();
+
         for ( var i=-10000; i < 0; i += 100 )
           updateDrops( i );
 
@@ -723,7 +746,7 @@ var game = ( function () {
       addDrop = {
         x: player.posX + ( player.width ),
         y: player.posY + ( player.height )
-      }
+      };
     }
 
     function update() {
@@ -755,7 +778,7 @@ var game = ( function () {
 
         ( shots.length > 0 ) && shots.forEach( function ( shot, index ) {
             shot.id = index;
-            if ( checkCollisions( shot ) ) {
+            if ( !checkCollisionsShot( shot ) ) {
                 shot.posX += Math.cos( shot.direction ) * shot.speed;
                 shot.posY += Math.sin( shot.direction ) * shot.speed;
 
@@ -770,16 +793,17 @@ var game = ( function () {
 
         (buggers.length > 0) && buggers.forEach(function(bugger, index) {
             bugger.id = index;
-            bugger.update();
             //colisiones
-            if (bugger.posX < 0 || bugger.posX > canvas.width) {
-                bugger.del(parseInt(bugger.id, 10));
+            if (!checkCollisionsBugger(bugger)) {
+                bugger.update();
+                if (bugger.posX < 0 || bugger.posX > canvas.width) {
+                    bugger.del(parseInt(bugger.id, 10));
+                }
+                bufferctx.drawImage(bugger, bugger.posX, bugger.posY);
             }
-            bufferctx.drawImage(bugger, bugger.posX, bugger.posY);
         });
-        for (var i = 0, n = buggersCount - buggers.length; i < n; i++) {
-            var b = new Bugger();
-            b.add();
+        if (player.bombing === false) {
+            createBuggers();
         }
         playerAction();
 
@@ -817,7 +841,22 @@ var game = ( function () {
             xunits: Math.cos(o) * u,
             yunits: Math.sin(o) * u,
             moves: 0
+        };
+    };
+
+    function createBuggers() {
+        var b = null;
+        for (var i = 0, n = buggersCount - buggers.length; i < n; i++) {
+            b = new Bugger();
+            b.add();
         }
+    }
+
+    function destroyBuggers() {
+        buggers.forEach(function(bugger, index) {
+            delete bugger;
+        });
+        buggers.length = 0;
     }
 
     // Public Methods
