@@ -36,8 +36,12 @@ var game = ( function () {
             down: 40,
             rotateLeft: 65, // A
             rotateRight: 68, // D
+            fireMoreSpread: 87, // W
+            fireLessSpread: 83, // S
             fire: 88,     // X
             fire2: 67,    // C
+            increaseBullets: 107, // +
+            decreaseBullets: 109, // -
             focus: 90, // Z
             speedUp: 34,  // Av Pag
             speedDown: 33, // Re Pag
@@ -217,16 +221,87 @@ var game = ( function () {
         player.centerX = player.posX + ( player.width / 2 );
         player.centerY = player.posY + ( player.height / 2 );
         player.rotate = 0;
-        player.isBombing = false;
+        player.firing = false;
+        player.bombing = false;
+        player.cooldown = 0;
 
-        player.fire = function() {
-            if (nextShootTime < currentTime || currentTime === 0) {
-                var shot = new Shot( this, player.posX, player.posY, player.rotate, 5 );
-                shot.add();
-                currentTime += shotDelay;
-                nextShootTime = currentTime + shotDelay;
+        player.weapon = {
+           count: 2,
+           chaos: 0,
+           spreadBase: 7,
+           spacing: 0,
+           speed: 30,
+           color: "#00ffff",
+           shape: 0,
+           firerate: 20
+        };
+        player.weapon.spread = Math.PI / player.weapon.spreadBase;
+
+        player.increaseWeaponSpread = function ( ) {
+            if ( player.weapon.spreadBase < 20 ) {
+                player.weapon.spreadBase += 0.2;
+                player.weapon.spread = Math.PI / player.weapon.spreadBase;
+            }
+        };
+
+        player.decreaseWeaponSpread = function ( ) {
+            if ( player.weapon.spreadBase > 2 ) {
+                player.weapon.spreadBase -= 0.2;
+                player.weapon.spread = Math.PI / player.weapon.spreadBase;
+            }
+        }
+
+        player.increaseBullets = function ( ) {
+            if ( player.weapon.count < 20 ) {
+                player.weapon.count += 1;
+            }
+        };
+
+        player.decreaseBullets = function ( ) {
+            if ( player.weapon.count >= 2 ) {
+                player.weapon.count -= 1;
+            }
+        };
+
+        player.checkForFire = function () {
+            player.cooldown -= 60; // FPS
+            if ( player.firing ) {
+                if ( player.cooldown <= 0 ) {
+                    player.fire();
+                    player.cooldown = player.weapon.firerate;
+                }
+            }
+        }
+
+        player.fire = function () {
+            if ( player.weapon.count > 1 ) {
+                var spreadStart = -player.weapon.spread / 2,
+                    spacingStart = player.weapon.spacing / 2,
+                    spreadStep = player.weapon.spread / (player.weapon.count - 1),
+                    spacingStep = player.weapon.spacing / (player.weapon.count -1);
             } else {
-                currentTime = new Date().getTime();
+                var spreadStart = 0,
+                    spacingStart = 0,
+                    spreadStep = 0,
+                    spacingStep = 0;
+            }
+
+            var rotation = player.rotate * to_radians,
+                gunX = player.posX + Math.cos( rotation ) * 34 - Math.sin( rotation ) * 5,
+                gunY = player.posY + Math.sin( rotation ) * 34 + Math.cos( rotation ) * 5;
+
+            for( var i = 0; i < this.weapon.count; i++ ) {
+                var spacingOffsetX = Math.cos( rotation - Math.PI / 2) * ( spacingStart - i * spacingStep ),
+                    spacingOffsetY = Math.sin( rotation - Math.PI / 2) * ( spacingStart - i * spacingStep );
+
+                shot = new Shot( {
+                    shot : this,
+                    direction : rotation + spreadStart + i * spreadStep,
+                    shotX : gunX + spacingOffsetX + Math.random() * player.weapon.chaos - player.weapon.chaos / 2,
+                    shotY : gunY + spacingOffsetY + Math.random() * player.weapon.chaos - player.weapon.chaos / 2,
+                    speed : player.weapon.speed
+                } );
+                shot.add();
             }
         };
 
@@ -243,22 +318,24 @@ var game = ( function () {
         return player;
     }
 
-    function Shot(shot, _x, _y, _direction, _speed) {
-        shot = new Image();
-        shot.src = 'images/shot.png'; //12x12
-        shot.posX = _x;
-        shot.posY = _y;
-        shot.direction = _direction * to_radians;
-        shot.speed = _speed;
-        shot.id = 0;
-        shot.time = new Date().getTime();
-        shot.add = function() {
-            shots.push(shot);
+    function Shot( args ) {
+        args.shot = new Image();
+        args.shot.src = 'images/shot.png'; //12x12
+        args.shot.posX = args.shotX;
+        args.shot.posY = args.shotY;
+        args.shot.direction = args.direction || 0;
+        args.shot.speed = args.speed || 256;
+        args.shot.color = args.color || "F00";
+
+        args.shot.add = function() {
+            shots.push( shot );
         };
-        shot.del = function(id) {
-            arrayRemove(shots, id);
+
+        args.shot.del = function( id ) {
+            arrayRemove( shots, id );
         };
-        return shot;
+
+        return args.shot;
     }
 
     function Enemy(enemy, _x, _y) {
@@ -388,8 +465,22 @@ var game = ( function () {
         if (keyPressed.rotateRight) {
             rotateRight();
         }
+        if (keyPressed.fireMoreSpread) {
+            player.increaseWeaponSpread();
+        }
+        if (keyPressed.fireLessSpread) {
+            player.decreaseWeaponSpread();
+        }
+        if (keyPressed.increaseBullets) {
+            player.increaseBullets();
+        }
+        if (keyPressed.decreaseBullets) {
+            player.decreaseBullets();
+        }
         if (keyPressed.fire) {
-            player.fire();
+            player.firing = true;
+        } else {
+            player.firing = false;
         }
         if (keyPressed.fire2) {
             bomb();
@@ -465,11 +556,11 @@ var game = ( function () {
     }
 
     function bomb () {
-        if ( player.isBombing ) {
+        if ( player.bombing ) {
             return;
         }
 
-        player.isBombing = true;
+        player.bombing = true;
 
         var ctx = bufferctx,
             dropCount = 3,
@@ -570,7 +661,7 @@ var game = ( function () {
             } );
 
             if ( ! drops.length ) {
-                player.isBombing = false;
+                player.bombing = false;
             } else {
                 requestAnimationFrame( renderDraw );
             }
@@ -606,7 +697,6 @@ var game = ( function () {
       }
     }
 
-
     function update() {
         scrollBackground( [ {
             source: [background, background2, background3, background4, background4Mirror, background3Mirror, background2Mirror, backgroundMirror ],
@@ -630,6 +720,9 @@ var game = ( function () {
 
         // bufferctx.drawImage(player, player.posX, player.posY);
         bufferctx.drawImage(enemy, enemy.posX, enemy.posY);
+
+        // Check for player shoots
+        player.checkForFire();
 
         ( shots.length > 0 ) && shots.forEach( function ( shot, index ) {
             shot.id = index;
