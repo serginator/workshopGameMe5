@@ -55,6 +55,7 @@ var game = ( function () {
         currentTime = 0,
         player, enemy,
         buggers = [],
+        buggersCount = 20,
         audioCtx, audioBuffer, audioMusic, currentAudioMusic, gainNode,
         changingMusic = false,
         musicList = [
@@ -170,7 +171,7 @@ var game = ( function () {
             addListener(document, 'keydown', keyDown);
             addListener(document, 'keyup', keyUp);
 
-            for (var i = 0, n = 50; i < n; i++) {
+            for (var i = 0, n = buggersCount; i < n; i++) {
                 var b = new Bugger();
                 b.add();
             }
@@ -365,12 +366,12 @@ var game = ( function () {
         bugger = new Image();
         bugger.src = 'images/bugger.png';
         bugger.initPos = (Math.random() * canvas.height) + 1;
-        bugger.posX = canvas.width;
+        bugger.posX = canvas.width - (Math.random() * 100) + 1;
         bugger.posY = bugger.initPos;
         bugger.speed = 5;
         bugger.update = function() {
-            bugger.posX -= 3 * Math.sin(bugger.initPos * Math.PI / 64);
-            bugger.posY -= bugger.speed;
+            bugger.posX -= bugger.speed;
+            bugger.posY -= 3 * Math.sin(bugger.initPos * Math.PI / 64);
             bugger.initPos++;
         };
         bugger.add = function() {
@@ -771,12 +772,12 @@ var game = ( function () {
             bugger.id = index;
             bugger.update();
             //colisiones
-            if (bugger.posX < 0 || bugger.posY < 0 || bugger.posX > canvas.width || bugger.posY > canvas.height) {
+            if (bugger.posX < 0 || bugger.posX > canvas.width) {
                 bugger.del(parseInt(bugger.id, 10));
             }
             bufferctx.drawImage(bugger, bugger.posX, bugger.posY);
         });
-        for (var i = 0, n = 50 - buggers.length; i < n; i++) {
+        for (var i = 0, n = buggersCount - buggers.length; i < n; i++) {
             var b = new Bugger();
             b.add();
         }
