@@ -386,6 +386,7 @@ var game = ( function () {
             if (a.posY >= b.posY && a.posY <=
                 (b.posY + b.height)) {
                 callback();
+                special(a.posX, a.posY);
                 return true;
             }
         }
@@ -536,7 +537,7 @@ var game = ( function () {
             bomb();
         }
         if (keyPressed.special) {
-            special();
+            special(player.posX, player.posY);
         }
         if (keyPressed.speedUp && bgSpeed < 10) {
             bgSpeed += 1;
@@ -810,9 +811,9 @@ var game = ( function () {
         particleManager.draw();
     }
 
-    function special () {
+    function special (x, y) {
         // Parametros del particleManager: posX, posY, size, area, life, speed, gravity
-        particleManager.createExplosion( player.posX, player.posY, 60, 5, 70, 3, 0 );
+        particleManager.createExplosion(x, y, 60, 5, 70, 3, 0 );
     }
 
     function ParticleManager(n) {
