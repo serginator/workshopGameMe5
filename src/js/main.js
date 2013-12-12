@@ -180,7 +180,7 @@ var game = ( function () {
                 window.requestAnimFrame(anim);
             };
             anim();
-        }, 10000);
+        }, 3000);
     }
 
     function createAudioSources(list) {
