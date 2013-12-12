@@ -62,7 +62,8 @@ var game = ( function () {
             'Music/MP3/16-bits-TFIV-Stand-Up-Against-Myself.mp3',
             'Music/MP3/32-bits-TFV-Steel-Of-Destiny.mp3',
             'Music/MP3/128-bits-Ikaruga-Ideal.mp3'
-        ];
+        ],
+        score = 0;
 
     function loop () {
         update();
@@ -348,13 +349,14 @@ var game = ( function () {
         enemy.src = 'images/boss.png'; //128x128
         enemy.posX = canvas.width - enemy.width;
         enemy.posY = canvas.height / 2 - enemy.width / 2;
-        enemy.life = 5; //5 hits
+        enemy.life = 150; //150 hits
         enemy.backToLife = function() {
             this.life = 5;
             this.posY = Math.floor(Math.random() *
                 (canvas.height - this.height));
             this.posX = Math.floor(Math.random() *
                 (canvas.width - this.width - player.width)) + player.width;
+            score += 1000;
         };
         return enemy;
     }
@@ -397,6 +399,7 @@ var game = ( function () {
         return checkCollision(shot, enemy, function() {
             (enemy.life > 1) ? enemy.life-- : enemy.backToLife();
             shot.del(parseInt(shot.id, 10));
+            score += 10;
         });
     }
 
@@ -406,7 +409,7 @@ var game = ( function () {
             ret = checkCollision(shot, bugger, function() {
                 shot.del(parseInt(shot.id, 10));
                     bugger.del(parseInt(bugger.id, 10));
-                    // score++
+                    score += 50;
             });
             if (ret) {
                 return true;
@@ -414,6 +417,7 @@ var game = ( function () {
         });
         return checkCollision(bugger, player, function() {
             // player.lifes--
+            score -= 20;
             bugger.del(parseInt(bugger.id, 10));
         });
     }
@@ -768,7 +772,6 @@ var game = ( function () {
             moveTo: 'left'
         } ] );
 
-
         renderImage( player, bufferctx, player.posX, player.posY, player.rotate );
 
         // bufferctx.drawImage(player, player.posX, player.posY);
@@ -809,6 +812,10 @@ var game = ( function () {
         playerAction();
 
         particleManager.draw();
+
+        bufferctx.fillStyle = '#fff';
+        bufferctx.font = 'italic 25px arial';
+        bufferctx.fillText('Score: ' + score, 50, 50);
     }
 
     function special (x, y) {
