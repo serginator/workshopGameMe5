@@ -769,6 +769,7 @@ var game = ( function () {
 
         (buggers.length > 0) && buggers.forEach(function(bugger, index) {
             bugger.id = index;
+            bugger.update();
             //colisiones
             if (bugger.posX < 0 || bugger.posY < 0 || bugger.posX > canvas.width || bugger.posY > canvas.height) {
                 bugger.del(parseInt(bugger.id, 10));
