@@ -171,7 +171,7 @@ var game = ( function () {
             addListener(document, 'keydown', keyDown);
             addListener(document, 'keyup', keyUp);
 
-            initBuggers();
+            createBuggers();
 
             // Gameloop
             var anim = function() {
@@ -803,10 +803,7 @@ var game = ( function () {
             }
         });
         if (player.bombing === false) {
-            for (var i = 0, n = buggersCount - buggers.length; i < n; i++) {
-                var b = new Bugger();
-                b.add();
-            }
+            createBuggers();
         }
         playerAction();
 
@@ -847,10 +844,9 @@ var game = ( function () {
         };
     };
 
-    function initBuggers() {
+    function createBuggers() {
         var b = null;
-        destroyBuggers();
-        for (var i = 0, n = buggersCount; i < n; i++) {
+        for (var i = 0, n = buggersCount - buggers.length; i < n; i++) {
             b = new Bugger();
             b.add();
         }
