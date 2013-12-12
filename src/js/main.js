@@ -54,6 +54,7 @@ var game = ( function () {
         shotDelay = 100,
         currentTime = 0,
         player, enemy,
+        buggers = [],
         audioCtx, audioBuffer, audioMusic, currentAudioMusic, gainNode,
         changingMusic = false,
         musicList = [
@@ -168,6 +169,11 @@ var game = ( function () {
             // Attach keyboard control
             addListener(document, 'keydown', keyDown);
             addListener(document, 'keyup', keyUp);
+
+            for (var i = 0, n = 50; i < n; i++) {
+                var b = new Bugger();
+                b.add();
+            }
 
             // Gameloop
             var anim = function() {
@@ -353,6 +359,27 @@ var game = ( function () {
                 (canvas.width - this.width - player.width)) + player.width;
         };
         return enemy;
+    }
+
+    function Bugger(bugger) {
+        bugger = new Image();
+        bugger.src = 'images/bugger.png';
+        bugger.initPos = (Math.random() * canvas.height) + 1;
+        bugger.posX = canvas.width;
+        bugger.posY = bugger.initPos;
+        bugger.speed = 5;
+        bugger.update = function() {
+            bugger.posX -= 3 * Math.sin(bugger.initPos * Math.PI / 64);
+            bugger.posY -= bugger.speed;
+            bugger.initPos++;
+        };
+        bugger.add = function() {
+            buggers.push(bugger);
+        };
+        bugger.del = function(id) {
+            arrayRemove(buggers, id);
+        };
+        return bugger;
     }
 
     function checkCollisions(shot) {
@@ -739,6 +766,19 @@ var game = ( function () {
                 bufferctx.drawImage( shot, shot.posX, shot.posY);
             }
         } );
+
+        (buggers.length > 0) && buggers.forEach(function(bugger, index) {
+            bugger.id = index;
+            //colisiones
+            if (bugger.posX < 0 || bugger.posY < 0 || bugger.posX > canvas.width || bugger.posY > canvas.height) {
+                bugger.del(parseInt(bugger.id, 10));
+            }
+            bufferctx.drawImage(bugger, bugger.posX, bugger.posY);
+        });
+        for (var i = 0, n = 50 - buggers.length; i < n; i++) {
+            var b = new Bugger();
+            b.add();
+        }
         playerAction();
 
         particleManager.draw();
