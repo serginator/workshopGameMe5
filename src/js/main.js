@@ -51,7 +51,12 @@ var game = ( function () {
         currentTime = 0,
         player, enemy,
         audioCtx, audioBuffer, audioMusic, currentAudioMusic, gainNode,
-        changingMusic = false;
+        changingMusic = false,
+        musicList = [
+            'Music/MP3/16-bits-TFIV-Stand-Up-Against-Myself.mp3',
+            'Music/MP3/32-bits-TFV-Steel-Of-Destiny.mp3',
+            'Music/MP3/128-bits-Ikaruga-Ideal.mp3'
+        ];
 
     function loop () {
         update();
@@ -89,11 +94,7 @@ var game = ( function () {
         audioCtx = new window.AudioContext();
 
         // Audio stuff
-        audioBuffer = new BufferLoader(audioCtx, [
-            'Music/MP3/16-bits-TFIV-Stand-Up-Against-Myself.mp3',
-            'Music/MP3/32-bits-TFV-Steel-Of-Destiny.mp3',
-            'Music/MP3/128-bits-Ikaruga-Ideal.mp3'
-        ], createAudioSources);
+        audioBuffer = new BufferLoader(audioCtx, musicList, createAudioSources);
         audioBuffer.load();
 
         setTimeout(function() {
@@ -176,7 +177,7 @@ var game = ( function () {
     function createAudioSources(list) {
         audioMusic = [];
         gainNode = audioCtx.createGain();
-        for (var i = 0; i < 3; i++) {
+        for (var i = 0, n = musicList.length; i < n; i++) {
             setAudioSource(i);
         }
         gainNode.connect(audioCtx.destination);
@@ -194,7 +195,7 @@ var game = ( function () {
         audioMusic[currentAudioMusic].stop(0);
         currentAudioMusic++;
         if (currentAudioMusic > audioMusic.length - 1) {
-            currentAudioMusic -= 3;
+            currentAudioMusic -= musicList.length;
         }
         setAudioSource(currentAudioMusic);
         audioMusic[currentAudioMusic].start(0);
