@@ -16,6 +16,8 @@ var arrayRemove = function( array, from ) {
     return array.push.apply( array, rest );
 };
 
+window.gamepadSupport.init();
+
 var game = ( function () {
 
     // Global vars
