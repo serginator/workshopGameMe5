@@ -21,6 +21,7 @@ var game = ( function () {
     // Global vars
     var canvas, ctx, buffer, bufferctx,
         background, background2, background3, background4,
+        backgroundMirror, background2Mirror, background3Mirror, background4Mirror,
         foreground, foreground2, foreground3, foreground4,
         starfield, starfield2,
         particleManager, fireParticle,
@@ -113,6 +114,22 @@ var game = ( function () {
             background4 = new Image();
             background4.src = 'images/background-4.jpg';
             background4.posX = background.width * 3;
+
+            backgroundMirror = new Image();
+            backgroundMirror.src = 'images/background-4-mirror.jpg';
+            backgroundMirror.posX = background.width * 4;
+
+            background2Mirror = new Image();
+            background2Mirror.src = 'images/background-3-mirror.jpg';
+            background2Mirror.posX = background.width * 5;
+
+            background3Mirror = new Image();
+            background3Mirror.src = 'images/background-2-mirror.jpg';
+            background3Mirror.posX = background.width * 6;
+
+            background4Mirror = new Image();
+            background4Mirror.src = 'images/background-1-mirror.jpg';
+            background4Mirror.posX = 0;
 
             foreground = new Image();
             foreground.src = 'images/foreground-1.png';
@@ -591,7 +608,7 @@ var game = ( function () {
 
     function update() {
         scrollBackground( [ {
-            source: [background, background2, background3/*, background4*/],
+            source: [background, background2, background3, background4, background4Mirror, background3Mirror, background2Mirror, backgroundMirror ],
             orientation: 'horizontal',
             moveTo: 'left',
             speed: 0.5
