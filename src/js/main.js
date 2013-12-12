@@ -40,8 +40,8 @@ var game = ( function () {
             fireLessSpread: 83, // S
             fire: 88,     // X
             fire2: 67,    // C
-            increaseBullets: 107, // +
-            decreaseBullets: 109, // -
+            increaseBullets: 73, // I
+            decreaseBullets: 79, // O
             focus: 90, // Z
             speedUp: 34,  // Av Pag
             speedDown: 33, // Re Pag
