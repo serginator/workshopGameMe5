@@ -254,6 +254,17 @@ var game = ( function () {
         audioMusic[currentAudioMusic].start(0);
     }
 
+    function playFx(index) {
+        var audio = audioMusic[index];
+        if (audio.playbackState !== 0) {
+            audio.stop(0);
+        }
+        setAudioSource(index);
+        audio.loop = false;
+        audio.start(0);
+
+    }
+
     function toggleMute() {
         if (gainNode.gain.value === 1) {
             gainNode.gain.value = 0;
@@ -352,12 +363,7 @@ var game = ( function () {
                 } );
                 shot.add();
             }
-            if (audioMusic[musicList.length + FX.shot]) {
-                audioMusic[musicList.length + FX.shot].stop[0];
-            }
-            setAudioSource(musicList.length + FX.shot);
-            audioMusic[musicList.length + FX.shot].loop = false;
-            audioMusic[musicList.length + FX.shot].start(0);
+            playFx(musicList.length + FX.shot);
         };
 
         player.focusOn = function () {
@@ -441,6 +447,7 @@ var game = ( function () {
                 (b.posY + b.height)) {
                 callback();
                 special(a.posX, a.posY);
+                playFx(musicList.length + FX.explosion);
                 return true;
             }
         }
@@ -696,7 +703,7 @@ var game = ( function () {
 
         player.bombing = true;
 
-        audioMusic[musicList.length + FX.bomb].start(0);
+        playFx(musicList.length + FX.bomb);
 
         var ctx = bufferctx,
             dropCount = 3,
@@ -798,8 +805,10 @@ var game = ( function () {
 
             if ( ! drops.length ) {
                 player.bombing = false;
-                audioMusic[musicList.length + FX.bomb].stop(0);
-                setAudioSource(FX.bomb + musicList.length);
+                if (audioMusic[musicList.length + FX.bomb].playbackState !== 0) {
+                    audioMusic[musicList.length + FX.bomb].stop(0);
+                    setAudioSource(FX.bomb + musicList.length);
+                }
             } else {
                 requestAnimationFrame( renderDraw );
             }
