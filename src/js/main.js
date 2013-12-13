@@ -66,10 +66,10 @@ var game = ( function () {
             'Music/MP3/128-bits-Ikaruga-Ideal.mp3'
         ],
         fxList = [
-            'Music/FX/bomb.wav'/*,
-            'Music/FX/shoot.wav',
-            'Music/FX/throttle.wav',
-            'Music/FX/explosion.wav'*/
+            'Music/FX/bomb.mp3'/*,
+            'Music/FX/shoot.mp3',
+            'Music/FX/throttle.mp3',
+            'Music/FX/explosion.mp3'*/
         ],
         FX = {
             bomb: 0/*,
