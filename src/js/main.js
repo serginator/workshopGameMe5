@@ -47,10 +47,10 @@ var game = ( function () {
             speedDown: 33, // Re Pag
             toggleMusic: 84, // T, toggle music
             special: 32, // Space, bombs
-            lshift: 304, // Left shift, slow down
             mute: 77, // m key
             buggerMode: 49, // 1 key
             bossMode: 50, // 2 key
+            clearEnemies: 48 // 0 key
         },
         nextShootTime = 0,
         shotDelay = 100,
@@ -582,6 +582,16 @@ var game = ( function () {
                 boss = new Boss();
             }
         }
+        if (keyPressed.clearEnemies) {
+            if (bossMode) {
+                bossMode = false;
+                boss = null;
+            }
+            if (buggerMode) {
+                buggerMode = false;
+                destroyBuggers();
+            }
+        }
     }
 
     /**
@@ -834,6 +844,9 @@ var game = ( function () {
         bufferctx.fillStyle = '#fff';
         bufferctx.font = 'italic 25px arial';
         bufferctx.fillText('Score: ' + score, 50, 50);
+
+        printHelp();
+
     }
 
     function special (x, y) {
@@ -883,6 +896,30 @@ var game = ( function () {
             delete bugger;
         });
         buggers.length = 0;
+    }
+
+    function printHelp() {
+        bufferctx.font = 'italic 15px arial';
+
+        bufferctx.fillText('[Arrows] -> Move', 10, canvas.height - 70);
+        bufferctx.fillText('[1] -> Buggers Mode', 10, canvas.height - 50);
+        bufferctx.fillText('[2] -> Boss Mode', 10, canvas.height - 30);
+        bufferctx.fillText('[X] -> Shoot', 10, canvas.height - 10);
+
+        bufferctx.fillText('[C] -> Bombs', 150, canvas.height -70);
+        bufferctx.fillText('[Z] -> Focus', 150, canvas.height - 50);
+        bufferctx.fillText('[A] -> Rotate left', 150, canvas.height - 30);
+        bufferctx.fillText('[D] -> Rotate right', 150, canvas.height - 10);
+
+        bufferctx.fillText('[W] -> Fire more spread', 280, canvas.height - 70);
+        bufferctx.fillText('[I] -> Increase bullets', 280, canvas.height - 50);
+        bufferctx.fillText('[O] -> Decrease bullets', 280, canvas.height - 30);
+        bufferctx.fillText('[T] -> Change music', 280, canvas.height - 10);
+
+        bufferctx.fillText('[M] -> Mute', 450, canvas.height - 70);
+        bufferctx.fillText('[Av Pag] -> Speed up', 450, canvas.height - 50);
+        bufferctx.fillText('[Re Pag] -> Speed down', 450, canvas.height - 30);
+        bufferctx.fillText('[0] -> Clear enemies', 450, canvas.height - 10);
     }
 
     // Public Methods
