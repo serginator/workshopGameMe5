@@ -557,7 +557,8 @@ var game = ( function () {
         if (keyPressed.up && player.posY > ( player.height / 2 ) ) {
             playerUp();
         }
-        if (keyPressed.down && player.posY < ( canvas.height - player.height / 2 ) ) {
+        if (keyPressed.down && player.posY < ( canvas.height - player.height / 2 ) &&
+                player.posY < background.height) {
             player.posY += player.speed;
         }
         if (keyPressed.left && player.posX > ( player.width / 2 ) ) {
