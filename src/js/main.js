@@ -272,9 +272,9 @@ var game = ( function () {
         player.cooldown = 0;
 
         player.weapon = {
-           count: 2,
+           count: 1,
            chaos: 0,
-           spreadBase: 7,
+           spreadBase: 9,
            spacing: 0,
            speed: 30,
            color: "#00ffff",
@@ -900,7 +900,7 @@ var game = ( function () {
 
     function special (x, y) {
         // Parametros del particleManager: posX, posY, size, area, life, speed, gravity
-        particleManager.createExplosion(x, y, 60, 5, 70, 3, 0 );
+        particleManager.createExplosion(x, y, 25, 4, 70, 3, 0.1 );
     }
 
     function ParticleManager(n) {
