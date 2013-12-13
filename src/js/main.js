@@ -66,16 +66,14 @@ var game = ( function () {
             'Music/MP3/128-bits-Ikaruga-Ideal.mp3'
         ],
         fxList = [
-            'Music/FX/bomb.mp3'/*,
-            'Music/FX/shoot.mp3',
-            'Music/FX/throttle.mp3',
-            'Music/FX/explosion.mp3'*/
+            'Music/FX/bomb.mp3',
+            'Music/FX/shot.mp3',
+            'Music/FX/explosion.mp3'
         ],
         FX = {
-            bomb: 0/*,
-            shoot: 1,
-            throttle: 2,
-            explosion: 3*/
+            bomb: 0,
+            shot: 1,
+            explosion: 2
         };
         score = 0,
         buggerMode = false,
@@ -351,6 +349,12 @@ var game = ( function () {
                 } );
                 shot.add();
             }
+            if (audioMusic[musicList.length + FX.shot]) {
+                audioMusic[musicList.length + FX.shot].stop[0];
+            }
+            setAudioSource(musicList.length + FX.shot);
+            audioMusic[musicList.length + FX.shot].loop = false;
+            audioMusic[musicList.length + FX.shot].start(0);
         };
 
         player.focusOn = function () {
@@ -617,8 +621,8 @@ var game = ( function () {
         }
         if (keyPressed.bossMode) {
             if (!bossMode) {
-                buggerMode = false;
                 bossMode = true;
+                buggerMode = false;
                 destroyBuggers();
                 boss = new Boss();
             }
