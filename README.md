@@ -1,9 +1,8 @@
-Workshop GameMe 5
-13-12-13
-@EtnasSoft y @serginator
-=========
+# Workshop GameMe 5
 
-Demo para el taller de GameMe5 2013.
+Demo para el taller de GameMe5 2013
+13-12-13
+por [@EtnasSoft](http://twitter.com/etnassoft) y [@serginator](http://twitter.com/serginator)
 
 ## Resources
 * Charla de [@EtnasSoft](http://twitter.com/etnassoft) y [@serginator](http://twitter.com/serginator) en Camon
