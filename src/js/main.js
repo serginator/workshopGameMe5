@@ -443,10 +443,16 @@ var game = ( function () {
     }
 
     function checkCollision(a, b, callback) {
-        if (a.posX >= b.posX && a.posX <=
-            (b.posX + b.width)) {
-            if (a.posY >= b.posY && a.posY <=
-                (b.posY + b.height)) {
+        var bX = b.posX, bY = b.posY, bW = b.width, bH = b.height;
+        if (b.fire) {
+            bX += 5;
+            bY -= 15;
+            bH = 15;
+            bW = 20;
+        }
+        if (a.posX >= bX && a.posX <= (bX + bW)) {
+            if ((a.posY >= bY && a.posY <= (bY + bH)) ||
+                (a.posY <= bY && bY < (a.posY + a.width))) {
                 callback();
                 makeExplosion(a.posX, a.posY);
                 playFx(musicList.length + FX.explosion);
