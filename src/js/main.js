@@ -48,12 +48,14 @@ var game = ( function () {
             toggleMusic: 84, // T, toggle music
             special: 32, // Space, bombs
             lshift: 304, // Left shift, slow down
-            mute: 77 // m key
+            mute: 77, // m key
+            buggerMode: 49, // 1 key
+            bossMode: 50, // 2 key
         },
         nextShootTime = 0,
         shotDelay = 100,
         currentTime = 0,
-        player, enemy,
+        player, boss,
         buggers = [],
         buggersCount = 20,
         audioCtx, audioBuffer, audioMusic, currentAudioMusic, gainNode,
@@ -63,7 +65,9 @@ var game = ( function () {
             'Music/MP3/32-bits-TFV-Steel-Of-Destiny.mp3',
             'Music/MP3/128-bits-Ikaruga-Ideal.mp3'
         ],
-        score = 0;
+        score = 0,
+        buggerMode = false,
+        bossMode = false;
 
     function loop () {
         update();
@@ -166,13 +170,10 @@ var game = ( function () {
             currentAudioMusic = 0;
 
             player = new Player();
-            enemy = new Enemy();
 
             // Attach keyboard control
             addListener(document, 'keydown', keyDown);
             addListener(document, 'keyup', keyUp);
-
-            createBuggers();
 
             // Gameloop
             var anim = function() {
@@ -344,21 +345,21 @@ var game = ( function () {
         return args.shot;
     }
 
-    function Enemy(enemy, _x, _y) {
-        enemy = new Image();
-        enemy.src = 'images/boss.png'; //128x128
-        enemy.posX = canvas.width - enemy.width;
-        enemy.posY = canvas.height / 2 - enemy.width / 2;
-        enemy.life = 150; //150 hits
-        enemy.backToLife = function() {
-            this.life = 5;
+    function Boss(boss, _x, _y) {
+        boss = new Image();
+        boss.src = 'images/boss.png'; //128x128
+        boss.posX = canvas.width - boss.width;
+        boss.posY = canvas.height / 2 - boss.width / 2;
+        boss.life = 150; //150 hits
+        boss.backToLife = function() {
+            this.life = 150;
             this.posY = Math.floor(Math.random() *
                 (canvas.height - this.height));
             this.posX = Math.floor(Math.random() *
                 (canvas.width - this.width - player.width)) + player.width;
             score += 1000;
         };
-        return enemy;
+        return boss;
     }
 
     function Bugger(bugger) {
@@ -396,8 +397,8 @@ var game = ( function () {
     }
 
     function checkCollisionsShot(shot) {
-        return checkCollision(shot, enemy, function() {
-            (enemy.life > 1) ? enemy.life-- : enemy.backToLife();
+        return checkCollision(shot, boss, function() {
+            (boss.life > 1) ? boss.life-- : boss.backToLife();
             shot.del(parseInt(shot.id, 10));
             score += 10;
         });
@@ -563,6 +564,22 @@ var game = ( function () {
                 changingMusic = true;
                 toggleMute();
                 console.log('Mute');
+            }
+        }
+        if (keyPressed.buggerMode) {
+            if (!buggerMode) {
+                buggerMode = true;
+                bossMode = false;
+                boss = null;
+                createBuggers();
+            }
+        }
+        if (keyPressed.bossMode) {
+            if (!bossMode) {
+                buggerMode = false;
+                bossMode = true;
+                destroyBuggers();
+                boss = new Boss();
             }
         }
     }
@@ -774,15 +791,16 @@ var game = ( function () {
 
         renderImage( player, bufferctx, player.posX, player.posY, player.rotate );
 
-        // bufferctx.drawImage(player, player.posX, player.posY);
-        bufferctx.drawImage(enemy, enemy.posX, enemy.posY);
+        if (bossMode) {
+            bufferctx.drawImage(boss, boss.posX, boss.posY);
+        }
 
         // Check for player shoots
         player.checkForFire();
 
-        ( shots.length > 0 ) && shots.forEach( function ( shot, index ) {
+        shots.length > 0 && shots.forEach( function ( shot, index ) {
             shot.id = index;
-            if ( !checkCollisionsShot( shot ) ) {
+            if (!bossMode || !checkCollisionsShot( shot ) ) {
                 shot.posX += Math.cos( shot.direction ) * shot.speed;
                 shot.posY += Math.sin( shot.direction ) * shot.speed;
 
@@ -795,7 +813,7 @@ var game = ( function () {
             }
         } );
 
-        (buggers.length > 0) && buggers.forEach(function(bugger, index) {
+        buggerMode && buggers.length > 0 && buggers.forEach(function(bugger, index) {
             bugger.id = index;
             //colisiones
             if (!checkCollisionsBugger(bugger)) {
@@ -806,7 +824,7 @@ var game = ( function () {
                 bufferctx.drawImage(bugger, bugger.posX, bugger.posY);
             }
         });
-        if (player.bombing === false) {
+        if (buggerMode && player.bombing === false) {
             createBuggers();
         }
         playerAction();
