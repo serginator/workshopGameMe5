@@ -709,10 +709,10 @@ var game = ( function () {
         playFx(musicList.length + FX.bomb);
 
         // BOMB
-        particleManager.createExplosion( 0, 0, 130, 25, 70, 3, 0 );
-        particleManager.createExplosion( canvas.width, 0, 130, 25, 70, 3, 0 );
-        particleManager.createExplosion( 0, background.height, 130, 25, 70, 3, 0 );
-        particleManager.createExplosion( canvas.width, background.height, 130, 25, 70, 3, 0 );
+        particleManager.createExplosion( 0, 0, 130, 15, 70, 3, 0 );
+        particleManager.createExplosion( canvas.width, 0, 130, 15, 70, 3, 0 );
+        particleManager.createExplosion( 0, background.height, 130, 15, 70, 3, 0 );
+        particleManager.createExplosion( canvas.width, background.height, 130, 15, 70, 3, 0 );
         particleManager.createExplosion( canvas.width / 2, background.height / 2, 100, 10, 70, 3, 0, function () {
             setTimeout( function () { player.bombing = false; }, 1500 );
         } );
