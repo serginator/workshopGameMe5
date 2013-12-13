@@ -47,13 +47,15 @@ var game = ( function () {
             speedDown: 33, // Re Pag
             toggleMusic: 84, // T, toggle music
             special: 32, // Space, bombs
-            lshift: 304, // Left shift, slow down
-            mute: 77 // m key
+            mute: 77, // m key
+            buggerMode: 49, // 1 key
+            bossMode: 50, // 2 key
+            clearEnemies: 48 // 0 key
         },
         nextShootTime = 0,
         shotDelay = 100,
         currentTime = 0,
-        player, enemy,
+        player, boss,
         buggers = [],
         buggersCount = 20,
         audioCtx, audioBuffer, audioMusic, currentAudioMusic, gainNode,
@@ -62,7 +64,10 @@ var game = ( function () {
             'Music/MP3/16-bits-TFIV-Stand-Up-Against-Myself.mp3',
             'Music/MP3/32-bits-TFV-Steel-Of-Destiny.mp3',
             'Music/MP3/128-bits-Ikaruga-Ideal.mp3'
-        ];
+        ],
+        score = 0,
+        buggerMode = false,
+        bossMode = false;
 
     function loop () {
         update();
@@ -188,7 +193,6 @@ var game = ( function () {
             currentAudioMusic = 0;
 
             player = new Player();
-            enemy = new Enemy();
 
             // Attach keyboard control
             addListener(document, 'keydown', keyDown);
@@ -197,18 +201,13 @@ var game = ( function () {
             // Resizing Event
             addListener(window, 'resize', resizeCanvas);
 
-            for (var i = 0, n = buggersCount; i < n; i++) {
-                var b = new Bugger();
-                b.add();
-            }
-
             // Gameloop
             var anim = function() {
                 resizeCanvas();
                 window.requestAnimFrame(anim);
             };
             anim();
-        }, 0);
+        }, 3000);
     }
 
     function createAudioSources(list) {
@@ -218,7 +217,6 @@ var game = ( function () {
             setAudioSource(i);
         }
         gainNode.connect(audioCtx.destination);
-        gainNode.gain.value = 0;
         audioMusic[0].start(0);
     }
 
@@ -372,20 +370,21 @@ var game = ( function () {
         return args.shot;
     }
 
-    function Enemy(enemy, _x, _y) {
-        enemy = new Image();
-        enemy.src = 'images/boss.png'; //128x128
-        enemy.posX = canvas.width - enemy.width;
-        enemy.posY = canvas.height / 2 - enemy.width / 2;
-        enemy.life = 5; //5 hits
-        enemy.backToLife = function() {
-            this.life = 5;
+    function Boss(boss, _x, _y) {
+        boss = new Image();
+        boss.src = 'images/boss.png'; //128x128
+        boss.posX = canvas.width - boss.width;
+        boss.posY = canvas.height / 2 - boss.width / 2;
+        boss.life = 150; //150 hits
+        boss.backToLife = function() {
+            this.life = 150;
             this.posY = Math.floor(Math.random() *
                 (canvas.height - this.height));
             this.posX = Math.floor(Math.random() *
                 (canvas.width - this.width - player.width)) + player.width;
+            score += 1000;
         };
-        return enemy;
+        return boss;
     }
 
     function Bugger(bugger) {
@@ -409,17 +408,44 @@ var game = ( function () {
         return bugger;
     }
 
-    function checkCollisions(shot) {
-        if (shot.posX >= enemy.posX && shot.posX <=
-            (enemy.posX + enemy.width)) {
-            if (shot.posY >= enemy.posY && shot.posY <=
-                (enemy.posY + enemy.height)) {
-                (enemy.life > 1) ? enemy.life-- : enemy.backToLife();
-                shot.del(parseInt(shot.id, 10));
-                return false;
+    function checkCollision(a, b, callback) {
+        if (a.posX >= b.posX && a.posX <=
+            (b.posX + b.width)) {
+            if (a.posY >= b.posY && a.posY <=
+                (b.posY + b.height)) {
+                callback();
+                special(a.posX, a.posY);
+                return true;
             }
         }
-        return true;
+        return false;
+    }
+
+    function checkCollisionsShot(shot) {
+        return checkCollision(shot, boss, function() {
+            (boss.life > 1) ? boss.life-- : boss.backToLife();
+            shot.del(parseInt(shot.id, 10));
+            score += 10;
+        });
+    }
+
+    function checkCollisionsBugger(bugger) {
+        var ret;
+        shots.forEach(function(shot, index) {
+            ret = checkCollision(shot, bugger, function() {
+                shot.del(parseInt(shot.id, 10));
+                    bugger.del(parseInt(bugger.id, 10));
+                    score += 50;
+            });
+            if (ret) {
+                return true;
+            }
+        });
+        return checkCollision(bugger, player, function() {
+            // player.lifes--
+            score -= 20;
+            bugger.del(parseInt(bugger.id, 10));
+        });
     }
 
     /**
@@ -541,7 +567,7 @@ var game = ( function () {
             bomb();
         }
         if (keyPressed.special) {
-            special();
+            special(player.posX, player.posY);
         }
         if (keyPressed.speedUp && bgSpeed < 10) {
             bgSpeed += 1;
@@ -563,6 +589,32 @@ var game = ( function () {
                 changingMusic = true;
                 toggleMute();
                 console.log('Mute');
+            }
+        }
+        if (keyPressed.buggerMode) {
+            if (!buggerMode) {
+                buggerMode = true;
+                bossMode = false;
+                boss = null;
+                createBuggers();
+            }
+        }
+        if (keyPressed.bossMode) {
+            if (!bossMode) {
+                buggerMode = false;
+                bossMode = true;
+                destroyBuggers();
+                boss = new Boss();
+            }
+        }
+        if (keyPressed.clearEnemies) {
+            if (bossMode) {
+                bossMode = false;
+                boss = null;
+            }
+            if (buggerMode) {
+                buggerMode = false;
+                destroyBuggers();
             }
         }
     }
@@ -741,6 +793,8 @@ var game = ( function () {
             ctx.fill();
         }
 
+        destroyBuggers();
+
         for ( var i=-10000; i < 0; i += 100 )
           updateDrops( i );
 
@@ -749,7 +803,7 @@ var game = ( function () {
       addDrop = {
         x: player.posX + ( player.width ),
         y: player.posY + ( player.height )
-      }
+      };
     }
 
     function update() {
@@ -770,18 +824,18 @@ var game = ( function () {
             moveTo: 'left'
         } ] );
 
-
         renderImage( player, bufferctx, player.posX, player.posY, player.rotate );
 
-        // bufferctx.drawImage(player, player.posX, player.posY);
-        bufferctx.drawImage(enemy, enemy.posX, enemy.posY);
+        if (bossMode) {
+            bufferctx.drawImage(boss, boss.posX, boss.posY);
+        }
 
         // Check for player shoots
         player.checkForFire();
 
-        ( shots.length > 0 ) && shots.forEach( function ( shot, index ) {
+        shots.length > 0 && shots.forEach( function ( shot, index ) {
             shot.id = index;
-            if ( checkCollisions( shot ) ) {
+            if (!bossMode || !checkCollisionsShot( shot ) ) {
                 shot.posX += Math.cos( shot.direction ) * shot.speed;
                 shot.posY += Math.sin( shot.direction ) * shot.speed;
 
@@ -794,27 +848,35 @@ var game = ( function () {
             }
         } );
 
-        (buggers.length > 0) && buggers.forEach(function(bugger, index) {
+        buggerMode && buggers.length > 0 && buggers.forEach(function(bugger, index) {
             bugger.id = index;
-            bugger.update();
             //colisiones
-            if (bugger.posX < 0 || bugger.posX > canvas.width) {
-                bugger.del(parseInt(bugger.id, 10));
+            if (!checkCollisionsBugger(bugger)) {
+                bugger.update();
+                if (bugger.posX < 0 || bugger.posX > canvas.width) {
+                    bugger.del(parseInt(bugger.id, 10));
+                }
+                bufferctx.drawImage(bugger, bugger.posX, bugger.posY);
             }
-            bufferctx.drawImage(bugger, bugger.posX, bugger.posY);
         });
-        for (var i = 0, n = buggersCount - buggers.length; i < n; i++) {
-            var b = new Bugger();
-            b.add();
+        if (buggerMode && player.bombing === false) {
+            createBuggers();
         }
         playerAction();
 
         particleManager.draw();
+
+        bufferctx.fillStyle = '#fff';
+        bufferctx.font = 'italic 25px arial';
+        bufferctx.fillText('Score: ' + score, 50, 50);
+
+        printHelp();
+
     }
 
-    function special () {
+    function special (x, y) {
         // Parametros del particleManager: posX, posY, size, area, life, speed, gravity
-        particleManager.createExplosion( player.posX, player.posY, 60, 5, 70, 3, 0 );
+        particleManager.createExplosion(x, y, 60, 5, 70, 3, 0 );
     }
 
     function ParticleManager(n) {
@@ -843,7 +905,46 @@ var game = ( function () {
             xunits: Math.cos(o) * u,
             yunits: Math.sin(o) * u,
             moves: 0
+        };
+    };
+
+    function createBuggers() {
+        var b = null;
+        for (var i = 0, n = buggersCount - buggers.length; i < n; i++) {
+            b = new Bugger();
+            b.add();
         }
+    }
+
+    function destroyBuggers() {
+        buggers.forEach(function(bugger, index) {
+            delete bugger;
+        });
+        buggers.length = 0;
+    }
+
+    function printHelp() {
+        bufferctx.font = 'italic 15px arial';
+
+        bufferctx.fillText('[Arrows] -> Move', 10, canvas.height - 70);
+        bufferctx.fillText('[1] -> Buggers Mode', 10, canvas.height - 50);
+        bufferctx.fillText('[2] -> Boss Mode', 10, canvas.height - 30);
+        bufferctx.fillText('[X] -> Shoot', 10, canvas.height - 10);
+
+        bufferctx.fillText('[C] -> Bombs', 150, canvas.height -70);
+        bufferctx.fillText('[Z] -> Focus', 150, canvas.height - 50);
+        bufferctx.fillText('[A] -> Rotate left', 150, canvas.height - 30);
+        bufferctx.fillText('[D] -> Rotate right', 150, canvas.height - 10);
+
+        bufferctx.fillText('[W] -> Fire more spread', 280, canvas.height - 70);
+        bufferctx.fillText('[I] -> Increase bullets', 280, canvas.height - 50);
+        bufferctx.fillText('[O] -> Decrease bullets', 280, canvas.height - 30);
+        bufferctx.fillText('[T] -> Change music', 280, canvas.height - 10);
+
+        bufferctx.fillText('[M] -> Mute', 450, canvas.height - 70);
+        bufferctx.fillText('[Av Pag] -> Speed up', 450, canvas.height - 50);
+        bufferctx.fillText('[Re Pag] -> Speed down', 450, canvas.height - 30);
+        bufferctx.fillText('[0] -> Clear enemies', 450, canvas.height - 10);
     }
 
     // Public Methods
