@@ -46,7 +46,7 @@ var game = ( function () {
             speedUp: 34,  // Av Pag
             speedDown: 33, // Re Pag
             toggleMusic: 84, // T, toggle music
-            special: 32, // Space, bombs
+            spaceBar: 32, // Space, bombs
             mute: 77, // m key
             buggerMode: 49, // 1 key
             bossMode: 50, // 2 key
@@ -234,6 +234,7 @@ var game = ( function () {
             audioMusic[i].loop = false;
         }
         gainNode.connect(audioCtx.destination);
+        gainNode.gain.value = 0;
         audioMusic[0].start(0);
     }
 
@@ -256,12 +257,13 @@ var game = ( function () {
 
     function playFx(index) {
         var audio = audioMusic[index];
-        if (audio.playbackState !== 0) {
+        if (audio.playing) {
             audio.stop(0);
         }
         setAudioSource(index);
         audio.loop = false;
         audio.start(0);
+        audio.playing = true;
 
     }
 
@@ -276,8 +278,8 @@ var game = ( function () {
     function Player ( player ) {
         player = new Image();
         player.src = 'images/ship.png';
-        player.posX = 30; // Dedault X position
-        player.posY = (canvas.height / 2) - (player.height / 2); // Def Y pos
+        player.posX = player.width; // Dedault X position
+        player.posY = (background.height / 2) - (player.height / 2); // Def Y pos
         player.centerX = player.posX + ( player.width / 2 );
         player.centerY = player.posY + ( player.height / 2 );
         player.rotate = 0;
@@ -446,7 +448,7 @@ var game = ( function () {
             if (a.posY >= b.posY && a.posY <=
                 (b.posY + b.height)) {
                 callback();
-                special(a.posX, a.posY);
+                makeExplosion(a.posX, a.posY);
                 playFx(musicList.length + FX.explosion);
                 return true;
             }
@@ -561,6 +563,10 @@ var game = ( function () {
             player.focusOff();
         }
 
+        if (keyPressed.spaceBar) {
+            return false;
+        }
+
         if (keyPressed.up && player.posY > ( player.height / 2 ) ) {
             playerUp();
         }
@@ -599,9 +605,6 @@ var game = ( function () {
         }
         if (keyPressed.fire2) {
             bomb();
-        }
-        if (keyPressed.special) {
-            special(player.posX, player.posY);
         }
         if (keyPressed.speedUp && bgSpeed < 10) {
             bgSpeed += 1;
@@ -705,145 +708,16 @@ var game = ( function () {
 
         playFx(musicList.length + FX.bomb);
 
-        var ctx = bufferctx,
-            dropCount = 3,
-            drops = [],
-            nextAdd = -1000000,
-            maxVelocity = .1,
-            width = canvas.width * 1.5,
-            height = canvas.height * 1.5,
-            addDrop = null;
-
-        function rand ( max, min ) {
-            min = min || 0;
-            return Math.floor( Math.random() * ( max - min ) ) + min;
-        }
-
-        function gradient ( from,to ) {
-            var grd = ctx.createLinearGradient( 0, 0, canvas.width, canvas.height );
-            grd.addColorStop( 0, from );
-            grd.addColorStop( 1, to );
-            return grd;
-        }
-
-        var gradients = [
-            gradient( 'rgb( 142, 214, 255 )', 'rgb( 179, 76, 0 )' )
-        ];
-
-        function compact( array ) {
-            var index = -1,
-                length = array ? array.length : 0,
-                resIndex = 0,
-                result = [];
-
-            while ( ++index < length ) {
-                var value = array[ index ];
-                if ( value ) {
-                    result[ resIndex++ ] = value;
-                }
-            }
-            return result;
-        }
-
-        function updateDrops ( tm ) {
-
-            if ( !addDrop && ( tm < nextAdd ) )
-                return;
-
-            var index = -1;
-
-            nextAdd = tm + 400;
-
-            if ( !tm ) {
-                addDrop = null;
-            }
-
-            // remove the nulls
-            drops = compact( drops );
-            if ( addDrop ) {
-                while ( ++index < dropCount ) {
-                    var x = addDrop.x,
-                        y = addDrop.y;
-
-                    if ( dropCount > 1 ) {
-                        x += rand( 200 );
-                        y += rand( 200 );
-                    }
-
-                    drops.push( {
-                        x: Math.ceil( x ),
-                        y: Math.ceil( y ),
-                        start: tm,
-                        vx: Math.random() * maxVelocity * 2 - maxVelocity,
-                        vy: Math.random() * maxVelocity * 2 - maxVelocity,
-                        g: rand( gradients.length ),
-                        r: canvas.width,
-                        speed: 4
-                    } );
-                }
-                addDrop = null;
-            }
-        }
-
-        function renderDraw ( tm ) {
-            // clear the field
-            ctx.globalAlpha = 1;
-            ctx.fillStyle = 'white';
-            ctx.fillRect( 0, 0, canvas.width, canvas.height );
-
-            // update the drops
-            updateDrops( tm );
-
-            // draw the drops
-            drops.forEach( function ( drop, i ) {
-            if ( drop ) {
-                var erase = drawDrop( drop, tm, ctx, gradients[ 0 ] );
-                if ( erase )
-                    drops[ i ] = null;
-                }
-            } );
-
-            if ( ! drops.length ) {
-                player.bombing = false;
-                if (audioMusic[musicList.length + FX.bomb].playbackState !== 0) {
-                    audioMusic[musicList.length + FX.bomb].stop(0);
-                    setAudioSource(FX.bomb + musicList.length);
-                }
-            } else {
-                requestAnimationFrame( renderDraw );
-            }
-        };
-
-
-        function drawDrop ( drop, tm, ctx, grd ) {
-            var r = ( ( tm - drop.start ) / drop.speed );
-            if ( r > ( drop.r * 0.8 ) )
-                return true;
-
-            drop.x += drop.vx;
-            drop.y += drop.vy;
-
-            ctx.globalAlpha = Math.max(0,(1-(r/drop.r)))*1;
-            ctx.strokeStyle = grd;
-            ctx.lineWidth = 6;
-            ctx.beginPath();
-            ctx.arc( ( drop.x / width ) * canvas.width, ( drop.y / height ) * canvas.height, r, 0, 2 * Math.PI, false );
-            ctx.stroke();
-            ctx.lineWidth = 0;
-            ctx.fill();
-        }
+        // BOMB
+        particleManager.createExplosion( 0, 0, 130, 25, 70, 3, 0 );
+        particleManager.createExplosion( canvas.width, 0, 130, 25, 70, 3, 0 );
+        particleManager.createExplosion( 0, background.height, 130, 25, 70, 3, 0 );
+        particleManager.createExplosion( canvas.width, background.height, 130, 25, 70, 3, 0 );
+        particleManager.createExplosion( canvas.width / 2, background.height / 2, 100, 10, 70, 3, 0, function () {
+            setTimeout( function () { player.bombing = false; }, 1500 );
+        } );
 
         destroyBuggers();
-
-        for ( var i=-10000; i < 0; i += 100 )
-          updateDrops( i );
-
-      requestAnimationFrame( renderDraw );
-
-      addDrop = {
-        x: player.posX + ( player.width ),
-        y: player.posY + ( player.height )
-      };
     }
 
     function update() {
@@ -914,7 +788,7 @@ var game = ( function () {
 
     }
 
-    function special (x, y) {
+    function makeExplosion (x, y) {
         // Parametros del particleManager: posX, posY, size, area, life, speed, gravity
         particleManager.createExplosion(x, y, 25, 4, 70, 3, 0.1 );
     }
@@ -924,11 +798,15 @@ var game = ( function () {
             i = n;
         this.draw = function () {
             for (var r = [], n = t.length - 1; n >= 0; n--) t[n].moves++, t[n].x += t[n].xunits, t[n].y += t[n].yunits + t[n].gravity * t[n].moves, t[n].moves < t[n].life && (r.push(t[n]), i.globalAlpha = 5 / t[n].moves, i.drawImage(fireParticle, Math.floor(t[n].x), Math.floor(t[n].y), t[n].width, t[n].height), i.globalAlpha = 1);
-            t = r
-        }, this.createExplosion = function (n, i, r, u, f, e, o) {
+            t = r;
+        }, this.createExplosion = function (n, i, r, u, f, e, o, fn) {
             var e, s, h;
-            for (n = n - r * .5, i = i - r * .5, e = r * e * .01, s = 1; s < u; s++)
-                for (h = 0; h < 10 * s; h++) t.push(particle(n, i, r, r, s * e, o, f))
+            for (n = n - r * .5, i = i - r * .5, e = r * e * .01, s = 1; s < u; s++) {
+                for (h = 0; h < 10 * s; h++) {
+                    t.push(particle(n, i, r, r, s * e, o, f))
+                }
+            }
+            fn && fn();
         }
     }
     var particle = function (n, t, i, r, u, f, e) {
