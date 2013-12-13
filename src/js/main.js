@@ -10,6 +10,12 @@ window.requestAnimFrame = ( function () {
         };
 } ) ();
 
+/**
+ * Method to remove an item from an array
+ * @param  {[type]} array
+ * @param  {[type]} from
+ * @return {[type]}
+ */
 var arrayRemove = function( array, from ) {
     var rest = array.slice( ( from ) + 1 || array.length );
     array.length = from < 0 ? array.length + from : from;
@@ -79,11 +85,21 @@ var game = ( function () {
         buggerMode = false,
         bossMode = false;
 
+    /**
+     * Main game loop
+     * @return {[type]}
+     */
     function loop () {
         update();
         draw();
     }
 
+    /**
+     * Extend an object
+     * @param  {[type]} destination
+     * @param  {[type]} source
+     * @return {[type]}
+     */
     function extend ( destination, source ) {
         for ( var property in source ) {
             destination[ property ] = source[ property ];
@@ -91,6 +107,10 @@ var game = ( function () {
         return destination;
     }
 
+    /**
+     * Method to resize the canvas to a percentage of the full screen
+     * @return {[type]}
+     */
     function resizeCanvas () {
         canvas.width = window.innerWidth * 0.85; // 85%
         canvas.height = window.innerHeight * 0.85;
@@ -99,6 +119,10 @@ var game = ( function () {
         loop();
     }
 
+    /**
+     * Init vars, load assets and start the main animation.
+     * @return {[type]}
+     */
     function init () {
         canvas = document.getElementById( 'canvas' );
         ctx = canvas.getContext( '2d' );
@@ -223,6 +247,11 @@ var game = ( function () {
         }, 3000);
     }
 
+    /**
+     * Method to create the audio sources and connect the gain to them
+     * @param  {[type]} list
+     * @return {[type]}
+     */
     function createAudioSources(list) {
         audioMusic = [];
         gainNode = audioCtx.createGain();
@@ -238,6 +267,10 @@ var game = ( function () {
         audioMusic[0].start(0);
     }
 
+    /**
+     * Set an audio source
+     * @param {[type]} index
+     */
     function setAudioSource(index) {
         audioMusic[ index ] = audioCtx.createBufferSource();
         audioMusic[ index ].buffer = audioBuffer.bufferList[ index ];
@@ -245,6 +278,10 @@ var game = ( function () {
         audioMusic[ index ].loop = true;
     }
 
+    /**
+     * Method to change between music files
+     * @return {[type]}
+     */
     function changeAudioMusic() {
         audioMusic[currentAudioMusic].stop(0);
         currentAudioMusic++;
@@ -255,6 +292,11 @@ var game = ( function () {
         audioMusic[currentAudioMusic].start(0);
     }
 
+    /**
+     * Method to play a FX
+     * @param  {[type]} index
+     * @return {[type]}
+     */
     function playFx(index) {
         var audio = audioMusic[index];
         if (audio.playing) {
@@ -267,6 +309,10 @@ var game = ( function () {
 
     }
 
+    /**
+     * Method to toggle mute
+     * @return {[type]}
+     */
     function toggleMute() {
         if (gainNode.gain.value === 1) {
             gainNode.gain.value = 0;
@@ -275,6 +321,10 @@ var game = ( function () {
         }
     }
 
+    /**
+     * Player object
+     * @param {[type]} player
+     */
     function Player ( player ) {
         player = new Image();
         player.src = 'images/ship.png';
@@ -287,6 +337,10 @@ var game = ( function () {
         player.bombing = false;
         player.cooldown = 0;
 
+        /**
+         * Weapon of the player
+         * @type {Object}
+         */
         player.weapon = {
            count: 1,
            chaos: 0,
@@ -299,6 +353,10 @@ var game = ( function () {
         };
         player.weapon.spread = Math.PI / player.weapon.spreadBase;
 
+        /**
+         * Method to sread bullets
+         * @return {[type]}
+         */
         player.increaseWeaponSpread = function ( ) {
             if ( player.weapon.spreadBase < 20 ) {
                 player.weapon.spreadBase += 0.2;
@@ -306,6 +364,10 @@ var game = ( function () {
             }
         };
 
+        /**
+         * Method to decrease bullets' spread
+         * @return {[type]}
+         */
         player.decreaseWeaponSpread = function ( ) {
             if ( player.weapon.spreadBase > 2 ) {
                 player.weapon.spreadBase -= 0.2;
@@ -313,18 +375,30 @@ var game = ( function () {
             }
         }
 
+        /**
+         * Increase power fire
+         * @return {[type]}
+         */
         player.increaseBullets = function ( ) {
             if ( player.weapon.count < 20 ) {
                 player.weapon.count += 1;
             }
         };
 
+        /**
+         * Decrease power fire
+         * @return {[type]}
+         */
         player.decreaseBullets = function ( ) {
             if ( player.weapon.count >= 2 ) {
                 player.weapon.count -= 1;
             }
         };
 
+        /**
+         * Check for fire
+         * @return {[type]}
+         */
         player.checkForFire = function () {
             player.cooldown -= 60; // FPS
             if ( player.firing ) {
@@ -335,6 +409,11 @@ var game = ( function () {
             }
         }
 
+        /**
+         * Method to calculate position of the shoots and add more of them.
+         * It also handles the sound of the shoot
+         * @return {[type]}
+         */
         player.fire = function () {
             if ( player.weapon.count > 1 ) {
                 var spreadStart = -player.weapon.spread / 2,
@@ -348,6 +427,7 @@ var game = ( function () {
                     spacingStep = 0;
             }
 
+            // Holy grial of the rotation
             var rotation = player.rotate * to_radians,
                 gunX = player.posX + Math.cos( rotation ) * 34 - Math.sin( rotation ) * 5,
                 gunY = player.posY + Math.sin( rotation ) * 34 + Math.cos( rotation ) * 5;
@@ -368,11 +448,19 @@ var game = ( function () {
             playFx(musicList.length + FX.shot);
         };
 
+        /**
+         * Decrease speed of the ship
+         * @return {[type]}
+         */
         player.focusOn = function () {
             player.speed = 3;
             player.src = 'images/ship-focused.png';
         }
 
+        /**
+         * Restore normal speed of the ship
+         * @return {[type]}
+         */
         player.focusOff = function () {
             player.speed = 7;
             player.src = 'images/ship.png';
@@ -381,6 +469,10 @@ var game = ( function () {
         return player;
     }
 
+    /**
+     * Bullet object
+     * @param {[type]} args
+     */
     function Shot( args ) {
         args.shot = new Image();
         args.shot.src = 'images/shot.png'; //12x12
@@ -401,13 +493,24 @@ var game = ( function () {
         return args.shot;
     }
 
+    /**
+     * Boss example
+     * @param {[type]} boss
+     * @param {[type]} _x
+     * @param {[type]} _y
+     */
     function Boss(boss, _x, _y) {
         boss = new Image();
         boss.src = 'images/boss.png'; //128x128
         boss.posX = canvas.width - boss.width;
         boss.posY = canvas.height / 2 - boss.width / 2;
         boss.life = 700; //700 hits
-        boss.backToLife = function() {
+
+        /**
+         * Method to destroy the boss and generate an explosion
+         * @return {[type]}
+         */
+        boss.kill = function() {
             particleManager.createExplosion( boss.posX, boss.posY, 130, 15, 70, 3, 0 );
             score += 1000;
             bossMode = false;
@@ -415,6 +518,10 @@ var game = ( function () {
         return boss;
     }
 
+    /**
+     * Enemies object
+     * @param {[type]} bugger
+     */
     function Bugger(bugger) {
         bugger = new Image();
         bugger.src = 'images/bugger.png';
@@ -422,6 +529,11 @@ var game = ( function () {
         bugger.posX = canvas.width + (Math.random() * ( canvas.width / 2 ) ) + 1;
         bugger.posY = bugger.initPos;
         bugger.speed = 5;
+
+        /**
+         * Method to update the position of the bugger
+         * @return {[type]}
+         */
         bugger.update = function() {
             bugger.posX -= bugger.speed;
             bugger.posY -= 3 * Math.sin(bugger.initPos * Math.PI / 64);
@@ -439,6 +551,14 @@ var game = ( function () {
         return bugger;
     }
 
+    /**
+     * Method to check collisions between two objects and launch a callback
+     * if the collision is done
+     * @param  {[type]}   a
+     * @param  {[type]}   b
+     * @param  {Function} callback
+     * @return {[type]}
+     */
     function checkCollision(a, b, callback) {
         var bX = b.posX, bY = b.posY, bW = b.width, bH = b.height;
         if (b.fire) {
@@ -459,14 +579,24 @@ var game = ( function () {
         return false;
     }
 
+    /**
+     * Check bullet colisions
+     * @param  {[type]} shot
+     * @return {[type]}
+     */
     function checkCollisionsShot(shot) {
         return checkCollision(shot, boss, function() {
-            (boss.life > 1) ? boss.life-- : boss.backToLife();
+            (boss.life > 1) ? boss.life-- : boss.kill();
             shot.del(parseInt(shot.id, 10));
             score += 10;
         });
     }
 
+    /**
+     * Check enemies collisions
+     * @param  {[type]} bugger
+     * @return {[type]}
+     */
     function checkCollisionsBugger(bugger) {
         var ret;
         shots.forEach(function(shot, index) {
@@ -537,6 +667,15 @@ var game = ( function () {
         } );
     };
 
+    /**
+     * Method to render and rotate an image
+     * @param  {[type]} image
+     * @param  {[type]} ctxTmp
+     * @param  {[type]} x
+     * @param  {[type]} y
+     * @param  {[type]} angle
+     * @return {[type]}
+     */
     function renderImage ( image, ctxTmp, x, y, angle ) {
         ctxTmp.save();
         ctxTmp.translate( x, y );
@@ -545,20 +684,28 @@ var game = ( function () {
         ctxTmp.restore();
     }
 
-    function playerUp() {
-        player.posY -= player.speed;
-    }
-
+    /**
+     * Rotate player to the left
+     * @return {[type]}
+     */
     function rotateLeft () {
         player.rotate -= 5;
         if ( player.rotate <= -360 ) player.rotate = 0;
     }
 
+    /**
+     * Rotate player to the right
+     * @return {[type]}
+     */
     function rotateRight () {
         player.rotate += 5;
         if ( player.rotate >= 360 ) player.rotate = 0;
     }
 
+    /**
+     * Launch several actions depending on the key pressed
+     * @return {[type]}
+     */
     function playerAction() {
         if (keyPressed.focus) {
             player.focusOn();
@@ -571,7 +718,7 @@ var game = ( function () {
         }
 
         if (keyPressed.up && player.posY > ( player.height / 2 ) ) {
-            playerUp();
+            player.posY -= player.speed;
         }
         if (keyPressed.down && player.posY < ( canvas.height - player.height / 2 ) &&
                 player.posY < background.height) {
@@ -661,6 +808,10 @@ var game = ( function () {
 
     /**
      * CrossBrowser implementation for a Event Listener
+     * @param {[type]} element
+     * @param {[type]} type
+     * @param {[type]} expression
+     * @param {[type]} bubbling
      */
     function addListener(element, type, expression, bubbling) {
         bubbling = bubbling || false;
@@ -674,6 +825,11 @@ var game = ( function () {
         }
     }
 
+    /**
+     * Handle keyDown
+     * @param  {[type]} e
+     * @return {[type]}
+     */
     function keyDown(e) {
         var key = (window.event ? e.keyCode : e.which);
         for ( var inkey in keyMap ) {
@@ -684,6 +840,11 @@ var game = ( function () {
         }
     }
 
+    /**
+     * Handle keyUp
+     * @param  {[type]} e
+     * @return {[type]}
+     */
     function keyUp(e) {
         var key = (window.event ? e.keyCode : e.which);
         if (key === 84 || key == 77) {
@@ -697,11 +858,18 @@ var game = ( function () {
         }
     }
 
+    /**
+     * Draw the buffer into the context
+     * @return {[type]}
+     */
     function draw() {
-        // renderImage( buffer, 300, 300, 120 );
         ctx.drawImage(buffer, 0, 0);
     }
 
+    /**
+     * Create the bomb effect
+     * @return {[type]}
+     */
     function bomb () {
         if ( player.bombing ) {
             return;
@@ -723,6 +891,10 @@ var game = ( function () {
         destroyBuggers();
     }
 
+    /**
+     * Update the main game scene
+     * @return {[type]}
+     */
     function update() {
         scrollBackground( [ {
             source: [background, background2, background3, background4, background4Mirror, background3Mirror, background2Mirror, backgroundMirror ],
@@ -750,6 +922,7 @@ var game = ( function () {
         // Check for player shoots
         player.checkForFire();
 
+        // Checks collisions of bullets, updates positions and draws the images
         shots.length > 0 && shots.forEach( function ( shot, index ) {
             shot.id = index;
             if (!bossMode || !checkCollisionsShot( shot ) ) {
@@ -765,6 +938,7 @@ var game = ( function () {
             }
         } );
 
+        // Checks collisions of buggers, updates positions and draws the images
         buggerMode && buggers.length > 0 && buggers.forEach(function(bugger, index) {
             bugger.id = index;
             //colisiones
@@ -776,6 +950,8 @@ var game = ( function () {
                 bufferctx.drawImage(bugger, bugger.posX, bugger.posY);
             }
         });
+
+        // Create more buggers when they are destroyed
         if (buggerMode && player.bombing === false) {
             createBuggers();
         }
@@ -797,11 +973,21 @@ var game = ( function () {
 
     }
 
+    /**
+     * Makes an explosion
+     * @param  {[type]} x
+     * @param  {[type]} y
+     * @return {[type]}
+     */
     function makeExplosion (x, y) {
         // Parametros del particleManager: posX, posY, size, area, life, speed, gravity
         particleManager.createExplosion(x, y, 25, 4, 70, 3, 0.1 );
     }
 
+    /**
+     * Manages the particles for the explosions
+     * @param {[type]} n
+     */
     function ParticleManager(n) {
         var t = [],
             i = n;
@@ -818,7 +1004,19 @@ var game = ( function () {
             fn && fn();
         }
     }
-    var particle = function (n, t, i, r, u, f, e) {
+
+    /**
+     * Particle object
+     * @param  {[type]} n
+     * @param  {[type]} t
+     * @param  {[type]} i
+     * @param  {[type]} r
+     * @param  {[type]} u
+     * @param  {[type]} f
+     * @param  {[type]} e
+     * @return {[type]}
+     */
+    function particle (n, t, i, r, u, f, e) {
         var s = Math.floor(Math.random() * 360),
             o = s * Math.PI / 180;
         return {
@@ -835,6 +1033,10 @@ var game = ( function () {
         };
     };
 
+    /**
+     * Method to create buggers
+     * @return {[type]}
+     */
     function createBuggers() {
         var b = null;
         for (var i = 0, n = buggersCount - buggers.length; i < n; i++) {
@@ -843,6 +1045,10 @@ var game = ( function () {
         }
     }
 
+    /**
+     * Method to destroy buggers
+     * @return {[type]}
+     */
     function destroyBuggers() {
         buggers.forEach(function(bugger, index) {
             delete bugger;
@@ -850,6 +1056,10 @@ var game = ( function () {
         buggers.length = 0;
     }
 
+    /**
+     * Prints some help on screen
+     * @return {[type]}
+     */
     function printHelp() {
         bufferctx.font = 'italic 15px arial';
 
