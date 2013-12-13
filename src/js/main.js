@@ -57,7 +57,7 @@ var game = ( function () {
         currentTime = 0,
         player, boss,
         buggers = [],
-        buggersCount = 20,
+        buggersCount,
         audioCtx, audioBuffer, audioMusic, currentAudioMusic, gainNode,
         changingMusic = false,
         musicList = [
@@ -112,6 +112,9 @@ var game = ( function () {
         ctx.font = 'italic 25px arial';
         ctx.textBaseline = 'bottom';
         ctx.fillText('Loading...', buffer.width - 200, buffer.height - 50);
+
+        // Adjusting buggers
+        buggersCount = ( canvas.height / 40 ) * 15;
 
         // Particle System
         fireParticle = new Image;
@@ -410,14 +413,17 @@ var game = ( function () {
     function Bugger(bugger) {
         bugger = new Image();
         bugger.src = 'images/bugger.png';
-        bugger.initPos = (Math.random() * canvas.height) + 1;
-        bugger.posX = canvas.width - (Math.random() * 100) + 1;
-        bugger.posY = bugger.initPos > background.height ? background.height : bugger.initPos;
+        bugger.initPos = (Math.random() * ( background.height - 120 ) ) + 60;
+        bugger.posX = canvas.width + (Math.random() * ( canvas.width / 2 ) ) + 1;
+        bugger.posY = bugger.initPos;
         bugger.speed = 5;
         bugger.update = function() {
             bugger.posX -= bugger.speed;
             bugger.posY -= 3 * Math.sin(bugger.initPos * Math.PI / 64);
             bugger.initPos++;
+
+            if ( bugger.posY < 0 ) { bugger.posY = 0; }
+            if ( bugger.posY > background.height - 100 ) { bugger.posY = background.height - 100; }
         };
         bugger.add = function() {
             buggers.push(bugger);
