@@ -23,7 +23,7 @@ var game = ( function () {
         background, background2, background3, background4,
         backgroundMirror, background2Mirror, background3Mirror, background4Mirror,
         foreground, foreground2, foreground3, foreground4,
-        starfield, starfield2,
+        starfield, starfield2, starfield3, starfield4, starfield5, starfield6,
         particleManager, fireParticle,
         bgSpeed = 2,
         to_radians = Math.PI / 180,
@@ -81,14 +81,21 @@ var game = ( function () {
         return destination;
     }
 
+    function resizeCanvas () {
+        canvas.width = window.innerWidth * 0.85; // 85%
+        canvas.height = window.innerHeight * 0.85;
+        buffer.width = canvas.width;
+        buffer.height = canvas.height;
+        loop();
+    }
+
     function init () {
         canvas = document.getElementById( 'canvas' );
         ctx = canvas.getContext( '2d' );
 
+
         // Buffering
         buffer = document.createElement('canvas');
-        buffer.width = canvas.width;
-        buffer.height = canvas.height;
         bufferctx = buffer.getContext('2d');
 
         ctx.fillStyle = '#fff';
@@ -167,6 +174,22 @@ var game = ( function () {
             starfield2.src = 'images/starfield-2.png';
             starfield2.posX = starfield.width;
 
+            starfield3 = new Image();
+            starfield3.src = 'images/starfield-2.png';
+            starfield3.posX = starfield.width * 2;
+
+            starfield4 = new Image();
+            starfield4.src = 'images/starfield-2.png';
+            starfield4.posX = starfield.width * 3;
+
+            starfield5 = new Image();
+            starfield5.src = 'images/starfield-2.png';
+            starfield5.posX = starfield.width * 4;
+
+            starfield6 = new Image();
+            starfield6.src = 'images/starfield-2.png';
+            starfield6.posX = starfield.width * 5;
+
             currentAudioMusic = 0;
 
             player = new Player();
@@ -175,9 +198,12 @@ var game = ( function () {
             addListener(document, 'keydown', keyDown);
             addListener(document, 'keyup', keyUp);
 
+            // Resizing Event
+            addListener(window, 'resize', resizeCanvas);
+
             // Gameloop
             var anim = function() {
-                loop();
+                resizeCanvas();
                 window.requestAnimFrame(anim);
             };
             anim();
@@ -195,10 +221,10 @@ var game = ( function () {
     }
 
     function setAudioSource(index) {
-        audioMusic[index] = audioCtx.createBufferSource();
-        audioMusic[index].buffer = audioBuffer.bufferList[index];
-        audioMusic[index].connect(gainNode);
-        audioMusic[index].loop = true;
+        audioMusic[ index ] = audioCtx.createBufferSource();
+        audioMusic[ index ].buffer = audioBuffer.bufferList[ index ];
+        audioMusic[ index ].connect(gainNode);
+        audioMusic[ index ].loop = true;
     }
 
     function changeAudioMusic() {
@@ -435,8 +461,7 @@ var game = ( function () {
                 orientation: 'horizontal',
                 moveTo: 'right'
             },
-            originalLayersLength = layers.source.length,
-            index, axis, magnitude, displace, calculateNewMove, newPosition;
+            index, axis, magnitude, displace, calculateNewMove, newPosition, repeatFactor;
 
             if ( layers.mirrorAtEnd ) {
                 var mirror = background4;
@@ -453,21 +478,22 @@ var game = ( function () {
                 axis = ( settings.orientation === 'horizontal' ) ? 'X' : 'Y';
                 magnitude = ( settings.orientation === 'horizontal' ) ? 'width' : 'height';
                 displace = ( settings.moveTo === 'down' || settings.moveTo === 'right' ) ? 'negative' : 'positive';
+                repeatFactor = canvas.width / settings.source[ index ][ magnitude ];
 
                 displace === 'positive'
-                    ? settings.source[index][ 'pos' + axis ] -= settings.speed
-                    : settings.source[index][ 'pos' + axis ] += settings.speed;
+                    ? settings.source[ index ][ 'pos' + axis ] -= settings.speed
+                    : settings.source[ index ][ 'pos' + axis ] += settings.speed;
 
                 calculateNewMove = ( displace === 'positive' )
-                    ? settings.source[index][ 'pos' + axis ] > -( settings.source[ index ][ magnitude ] * ( originalLayersLength - 1 ) )
-                    : settings.source[index][ 'pos' + axis ] < settings.source[ index ][ magnitude ];
+                    ? settings.source[ index ][ 'pos' + axis ] + settings.source[ index ][ magnitude ] > 0
+                    : settings.source[ index ][ 'pos' + axis ] < settings.source[ index ][ magnitude ];
 
                 if ( calculateNewMove ) {
-                    newPosition = settings.source[index][ 'pos' + axis ];
-                    bufferctx.drawImage( settings.source[index], ( axis === 'X' ) ? newPosition : 0, ( axis === 'Y' ) ? newPosition : 0 );
+                    newPosition = settings.source[ index ][ 'pos' + axis ];
+                    bufferctx.drawImage( settings.source[ index ], ( axis === 'X' ) ? newPosition : 0, ( axis === 'Y' ) ? newPosition : 0 );
                 } else {
-                    newPosition = settings.source[index][ magnitude ];
-                    settings.source[index][ 'pos' + axis ] = ( displace === 'positive' ) ? newPosition : Math.abs( newPosition ) * -1;
+                    newPosition = settings.source[ index ][ magnitude ] * ( layers.source.length - ( layers.source.length % 4 ? 1 : 2 ) );
+                    settings.source[ index ][ 'pos' + axis ] = ( displace === 'positive' ) ? newPosition : Math.abs( newPosition ) * -1;
                 }
             }
         } );
@@ -783,17 +809,17 @@ var game = ( function () {
     function update() {
         scrollBackground( [ {
             source: [background, background2, background3, background4, background4Mirror, background3Mirror, background2Mirror, backgroundMirror ],
+            speed: 0.5,
             orientation: 'horizontal',
-            moveTo: 'left',
-            speed: 0.5
+            moveTo: 'left'
         }, {
-            source: [foreground, foreground2, foreground3, foreground4],
+            source: [foreground, foreground2, foreground3, foreground4, foreground, foreground2, foreground3, foreground4],
             speed: 3,
             orientation: 'horizontal',
             moveTo: 'left'
         }, {
-            source: [starfield, starfield2],
-            speed: 5,
+            source: [starfield, starfield2, starfield3, starfield4, starfield5, starfield6],
+            speed: 7,
             orientation: 'horizontal',
             moveTo: 'left'
         } ] );
