@@ -125,8 +125,8 @@ var game = ( function () {
         audioCtx = new window.AudioContext();
 
         // Audio stuff
-        // audioBuffer = new BufferLoader(audioCtx, musicList.concat(fxList), createAudioSources);
-        // audioBuffer.load();
+        audioBuffer = new BufferLoader(audioCtx, musicList.concat(fxList), createAudioSources);
+        audioBuffer.load();
 
         setTimeout(function() {
             // Load resources
@@ -220,7 +220,7 @@ var game = ( function () {
                 window.requestAnimFrame(anim);
             };
             anim();
-        }, 0/*3000*/);
+        }, 3000);
     }
 
     function createAudioSources(list) {
