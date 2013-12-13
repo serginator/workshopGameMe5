@@ -74,7 +74,7 @@ module.exports = function (grunt) {
     });
 
     grunt.registerTask('default', [
-        'jshint:src', 'gjslint:src'
+        'connect'
         ]);
 
 };
