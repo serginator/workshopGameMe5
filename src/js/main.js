@@ -191,7 +191,6 @@ var game = ( function () {
             setAudioSource(i);
         }
         gainNode.connect(audioCtx.destination);
-        gainNode.gain.value = 0;
         audioMusic[0].start(0);
     }
 
