@@ -234,6 +234,7 @@ var game = ( function () {
             audioMusic[i].loop = false;
         }
         gainNode.connect(audioCtx.destination);
+        gainNode.gain.value = 0;
         audioMusic[0].start(0);
     }
 
@@ -252,6 +253,18 @@ var game = ( function () {
         }
         setAudioSource(currentAudioMusic);
         audioMusic[currentAudioMusic].start(0);
+    }
+
+    function playFx(index) {
+        var audio = audioMusic[index];
+        if (audio.playing) {
+            audio.stop(0);
+        }
+        setAudioSource(index);
+        audio.loop = false;
+        audio.start(0);
+        audio.playing = true;
+
     }
 
     function toggleMute() {
@@ -352,15 +365,7 @@ var game = ( function () {
                 } );
                 shot.add();
             }
-
-            if ( audioMusic ) {
-                if ( audioMusic[ musicList.length + FX.shot ] ) {
-                    audioMusic[musicList.length + FX.shot].stop[0];
-                }
-                setAudioSource(musicList.length + FX.shot);
-                audioMusic[musicList.length + FX.shot].loop = false;
-                audioMusic[musicList.length + FX.shot].start(0);
-            }
+            playFx(musicList.length + FX.shot);
         };
 
         player.focusOn = function () {
@@ -444,6 +449,7 @@ var game = ( function () {
                 (b.posY + b.height)) {
                 callback();
                 makeExplosion(a.posX, a.posY);
+                playFx(musicList.length + FX.explosion);
                 return true;
             }
         }
@@ -564,7 +570,8 @@ var game = ( function () {
         if (keyPressed.up && player.posY > ( player.height / 2 ) ) {
             playerUp();
         }
-        if (keyPressed.down && player.posY < ( canvas.height - player.height / 2 ) ) {
+        if (keyPressed.down && player.posY < ( canvas.height - player.height / 2 ) &&
+                player.posY < background.height) {
             player.posY += player.speed;
         }
         if (keyPressed.left && player.posX > ( player.width / 2 ) ) {
@@ -699,7 +706,7 @@ var game = ( function () {
 
         player.bombing = true;
 
-        audioMusic && audioMusic[musicList.length + FX.bomb].start(0);
+        playFx(musicList.length + FX.bomb);
 
         // BOMB
         particleManager.createExplosion( 0, 0, 130, 25, 70, 3, 0 );
