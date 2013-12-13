@@ -406,14 +406,11 @@ var game = ( function () {
         boss.src = 'images/boss.png'; //128x128
         boss.posX = canvas.width - boss.width;
         boss.posY = canvas.height / 2 - boss.width / 2;
-        boss.life = 150; //150 hits
+        boss.life = 700; //700 hits
         boss.backToLife = function() {
-            this.life = 150;
-            this.posY = Math.floor(Math.random() *
-                (canvas.height - this.height));
-            this.posX = Math.floor(Math.random() *
-                (canvas.width - this.width - player.width)) + player.width;
+            particleManager.createExplosion( boss.posX, boss.posY, 130, 15, 70, 3, 0 );
             score += 1000;
+            bossMode = false;
         };
         return boss;
     }
@@ -786,8 +783,14 @@ var game = ( function () {
 
         particleManager.draw();
 
-        bufferctx.fillStyle = '#fff';
         bufferctx.font = 'italic 25px arial';
+
+        if (bossMode) {
+            bufferctx.fillStyle = "#f00";
+            bufferctx.fillText(boss.life, boss.posX - 23 + boss.width / 2, boss.posY - 20);
+        }
+
+        bufferctx.fillStyle = '#fff';
         bufferctx.fillText('Score: ' + score, 50, 50);
 
         printHelp();
