@@ -234,6 +234,7 @@ var game = ( function () {
             audioMusic[i].loop = false;
         }
         gainNode.connect(audioCtx.destination);
+        gainNode.gain.value = 0;
         audioMusic[0].start(0);
     }
 
@@ -256,12 +257,13 @@ var game = ( function () {
 
     function playFx(index) {
         var audio = audioMusic[index];
-        if (audio.playbackState !== 0) {
+        if (audio.playing) {
             audio.stop(0);
         }
         setAudioSource(index);
         audio.loop = false;
         audio.start(0);
+        audio.playing = true;
 
     }
 
