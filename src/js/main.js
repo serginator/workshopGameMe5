@@ -65,6 +65,18 @@ var game = ( function () {
             'Music/MP3/32-bits-TFV-Steel-Of-Destiny.mp3',
             'Music/MP3/128-bits-Ikaruga-Ideal.mp3'
         ],
+        fxList = [
+            'Music/FX/bomb.wav'/*,
+            'Music/FX/shoot.wav',
+            'Music/FX/throttle.wav',
+            'Music/FX/explosion.wav'*/
+        ],
+        FX = {
+            bomb: 0/*,
+            shoot: 1,
+            throttle: 2,
+            explosion: 3*/
+        };
         score = 0,
         buggerMode = false,
         bossMode = false;
@@ -105,7 +117,7 @@ var game = ( function () {
         audioCtx = new window.AudioContext();
 
         // Audio stuff
-        audioBuffer = new BufferLoader(audioCtx, musicList, createAudioSources);
+        audioBuffer = new BufferLoader(audioCtx, musicList.concat(fxList), createAudioSources);
         audioBuffer.load();
 
         setTimeout(function() {
@@ -189,6 +201,10 @@ var game = ( function () {
         gainNode = audioCtx.createGain();
         for (var i = 0, n = musicList.length; i < n; i++) {
             setAudioSource(i);
+        }
+        for (var i = musicList.length, n = i + fxList.length; i < n; i++) {
+            setAudioSource(i);
+            audioMusic[i].loop = false;
         }
         gainNode.connect(audioCtx.destination);
         audioMusic[0].start(0);
@@ -643,6 +659,8 @@ var game = ( function () {
 
         player.bombing = true;
 
+        audioMusic[musicList.length + FX.bomb].start(0);
+
         var ctx = bufferctx,
             dropCount = 3,
             drops = [],
@@ -743,6 +761,8 @@ var game = ( function () {
 
             if ( ! drops.length ) {
                 player.bombing = false;
+                audioMusic[musicList.length + FX.bomb].stop(0);
+                setAudioSource(FX.bomb + musicList.length);
             } else {
                 requestAnimationFrame( renderDraw );
             }
