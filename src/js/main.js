@@ -285,7 +285,7 @@ var game = ( function () {
     function changeAudioMusic() {
         audioMusic[currentAudioMusic].stop(0);
         currentAudioMusic++;
-        if (currentAudioMusic > audioMusic.length - 1) {
+        if (currentAudioMusic > musicList.length - 1) {
             currentAudioMusic -= musicList.length;
         }
         setAudioSource(currentAudioMusic);
