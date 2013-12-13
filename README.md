@@ -1,9 +1,14 @@
-navecitas
+Workshop GameMe 5
+13-12-13
+@EtnasSoft y @serginator
 =========
 
-Repo privado para el juego del taller de GameMe5
+Demo para el taller de GameMe5 2013.
 
-### Resources
+## Resources
+* Charla de [@EtnasSoft](http://twitter.com/etnassoft) y [@serginator](http://twitter.com/serginator) en Camon
+   * [Video](http://vimeo.com/39259983)
+   * [Slides](http://www.serginator.com/juegos-en-js)
 * [gamepad](http://html5gamepad.com/)
 * [audio](http://forestmist.org/share/web-audio-api-demo/)
 * [keypress](http://dmauro.github.io/Keypress/)
@@ -12,38 +17,35 @@ Repo privado para el juego del taller de GameMe5
 * [multiplayer](http://flippinawesome.org/2013/09/30/building-multiplayer-games-with-node-js-and-socket-io/)
 * [timelapse](http://greweb.me/2013/09/timelapse/)
 * [FX](http://ionden.com/a/plugins/ion.sound/en.html)
+* [Listado de Frameworks](https://gist.github.com/bebraw/768272)
+* [Sprite Database](http://sdb.drshnaps.com/)
+* [Megalista de recursos](http://www.mangatutorials.com/forum/showthread.php?742-The-Ultimate-Indie-Game-Developer-Resource-List)
 
+## Para lanzar la demo
+Conviene ejecutarla en un servidor web por la carga de recursos por XHR. Además está optimizada para Firefox >= 26.
+```bash
+npm install -g grunt-cli
+npm install
+grunt
+```
 
-### Sprite (C)
-- Sprite de la nave: 4 sprites; nave estática, nave arriba, nave abajo, y nave con 'focus'.
-
-### Keypress and Touch (S, C)
-
-### GamePad (S)
-
-### Musica (C)
-   - 8 Bits MP3 & WAV
+## Contenido de la demo
+* Sprites
+* Keypress
+* Musica y FX en MP3
+   - 8 Bits
    - 16 Bits
    - 128 Bits
-
-   - Biblioteca (S)
-
-### Redimensión del canvas
-- Redimesionar viewport.
-- Modificar todos los puntos (px) para pasarlos a porcentajes (%).
-
-### Enemigos
-- Sprites de enemigos: 3 enemigos y un jefe, ligeramente más grande pero con patrones frenéticos.
-- Patrones de movimiento
-- Patrones balísticos (tres patrones: disparo direccional, disparo hacia donde está el player, disparo predictivo y patrones geómetrico).
-- Actualizar mapa colisiones.
-
-- Enemigos: array con parámetros: tiempo de entrada, coordenada de entrada, de salida, puntos intermedios y tiempo que tarda en recorrer el camino.
-
-- Puntuación: sistema simple.
-
-
-### Gameplay
-- Velocidad de la nave de usuario.(S)
-- Bomba: fogonazo con FX que borre los proyectiles enemigos. (C)
-- Mapa de colisiones: limitar el hitbox del protagonista al sprite del 'focus'. (S)
+   - Biblioteca
+* Redimesión viewport.
+* Puntos como porcentajes
+* Enemigos
+   * Horda y boss
+   * Patrones de movimiento
+   * Colisiones.
+* Enemigos: array de enemigos, patrón de movimiento sinusoidal, colisiones
+* Puntuación: sistema simple.
+* Velocidad de la nave de usuario.
+* Explosiones, sistema de partículas
+* Bomba: fogonazo con FX que borre los enemigos.
+* Mapa de colisiones: limitar el hitbox del protagonista al sprite del 'focus'.
