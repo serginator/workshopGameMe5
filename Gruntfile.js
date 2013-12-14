@@ -75,6 +75,10 @@ module.exports = function (grunt) {
 
     grunt.registerTask('default', [
         'connect'
-        ]);
+    ]);
+
+    grunt.registerTask('lint', [
+        'jshint', 'gjslint'
+    ]);
 
 };
