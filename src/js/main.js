@@ -1,5 +1,8 @@
-// http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-window.requestAnimFrame = ( function () {
+/**
+ * http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+ * @return {[type]} [description]
+ */
+window.requestAnimFrame = (function() {
     return window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
         window.mozRequestAnimationFrame ||
@@ -8,7 +11,7 @@ window.requestAnimFrame = ( function () {
         function(/*function */callback, /* DOMElement*/element) {
             window.setTimeout(callback, 1000 / 60);
         };
-} ) ();
+}) ();
 
 /**
  * Method to remove an item from an array
@@ -16,13 +19,13 @@ window.requestAnimFrame = ( function () {
  * @param  {[type]} from
  * @return {[type]}
  */
-var arrayRemove = function( array, from ) {
-    var rest = array.slice( ( from ) + 1 || array.length );
+var arrayRemove = function(array, from) {
+    var rest = array.slice((from) + 1 || array.length);
     array.length = from < 0 ? array.length + from : from;
-    return array.push.apply( array, rest );
+    return array.push.apply(array, rest);
 };
 
-var game = ( function () {
+var game = (function() {
 
     // Global vars
     var canvas, ctx, buffer, bufferctx,
@@ -89,7 +92,7 @@ var game = ( function () {
      * Main game loop
      * @return {[type]}
      */
-    function loop () {
+    function loop() {
         update();
         draw();
     }
@@ -100,9 +103,9 @@ var game = ( function () {
      * @param  {[type]} source
      * @return {[type]}
      */
-    function extend ( destination, source ) {
-        for ( var property in source ) {
-            destination[ property ] = source[ property ];
+    function extend(destination, source) {
+        for (var property in source) {
+            destination[property] = source[property];
         }
         return destination;
     }
@@ -111,7 +114,7 @@ var game = ( function () {
      * Method to resize the canvas to a percentage of the full screen
      * @return {[type]}
      */
-    function resizeCanvas () {
+    function resizeCanvas() {
         canvas.width = window.innerWidth * 0.85; // 85%
         canvas.height = window.innerHeight * 0.85;
         buffer.width = canvas.width;
@@ -123,9 +126,9 @@ var game = ( function () {
      * Init vars, load assets and start the main animation.
      * @return {[type]}
      */
-    function init () {
-        canvas = document.getElementById( 'canvas' );
-        ctx = canvas.getContext( '2d' );
+    function init() {
+        canvas = document.getElementById('canvas');
+        ctx = canvas.getContext('2d');
 
 
         // Buffering
@@ -138,12 +141,12 @@ var game = ( function () {
         ctx.fillText('Loading...', buffer.width - 200, buffer.height - 50);
 
         // Adjusting buggers
-        buggersCount = ( canvas.height / 40 ) * 15;
+        buggersCount = (canvas.height / 40) * 15;
 
         // Particle System
         fireParticle = new Image();
         fireParticle.src = 'images/fire.png';
-        particleManager = new ParticleManager( bufferctx );
+        particleManager = new ParticleManager(bufferctx);
 
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         audioCtx = new window.AudioContext();
@@ -273,10 +276,10 @@ var game = ( function () {
      * @param {[type]} index
      */
     function setAudioSource(index) {
-        audioMusic[ index ] = audioCtx.createBufferSource();
-        audioMusic[ index ].buffer = audioBuffer.bufferList[ index ];
-        audioMusic[ index ].connect(gainNode);
-        audioMusic[ index ].loop = true;
+        audioMusic[index] = audioCtx.createBufferSource();
+        audioMusic[index].buffer = audioBuffer.bufferList[index];
+        audioMusic[index].connect(gainNode);
+        audioMusic[index].loop = true;
     }
 
     /**
@@ -326,13 +329,13 @@ var game = ( function () {
      * Player object
      * @param {[type]} player
      */
-    function Player ( player ) {
+    function Player(player) {
         player = new Image();
         player.src = 'images/ship.png';
         player.posX = player.width; // Dedault X position
         player.posY = (background.height / 2) - (player.height / 2); // Def Y pos
-        player.centerX = player.posX + ( player.width / 2 );
-        player.centerY = player.posY + ( player.height / 2 );
+        player.centerX = player.posX + (player.width / 2);
+        player.centerY = player.posY + (player.height / 2);
         player.rotate = 0;
         player.firing = false;
         player.bombing = false;
@@ -358,8 +361,8 @@ var game = ( function () {
          * Method to sread bullets
          * @return {[type]}
          */
-        player.increaseWeaponSpread = function ( ) {
-            if ( player.weapon.spreadBase < 20 ) {
+        player.increaseWeaponSpread = function() {
+            if (player.weapon.spreadBase < 20) {
                 player.weapon.spreadBase += 0.2;
                 player.weapon.spread = Math.PI / player.weapon.spreadBase;
             }
@@ -369,8 +372,8 @@ var game = ( function () {
          * Method to decrease bullets' spread
          * @return {[type]}
          */
-        player.decreaseWeaponSpread = function ( ) {
-            if ( player.weapon.spreadBase > 2 ) {
+        player.decreaseWeaponSpread = function() {
+            if (player.weapon.spreadBase > 2) {
                 player.weapon.spreadBase -= 0.2;
                 player.weapon.spread = Math.PI / player.weapon.spreadBase;
             }
@@ -380,8 +383,8 @@ var game = ( function () {
          * Increase power fire
          * @return {[type]}
          */
-        player.increaseBullets = function ( ) {
-            if ( player.weapon.count < 20 ) {
+        player.increaseBullets = function() {
+            if (player.weapon.count < 20) {
                 player.weapon.count += 1;
             }
         };
@@ -390,8 +393,8 @@ var game = ( function () {
          * Decrease power fire
          * @return {[type]}
          */
-        player.decreaseBullets = function ( ) {
-            if ( player.weapon.count >= 2 ) {
+        player.decreaseBullets = function() {
+            if (player.weapon.count >= 2) {
                 player.weapon.count -= 1;
             }
         };
@@ -400,10 +403,10 @@ var game = ( function () {
          * Check for fire
          * @return {[type]}
          */
-        player.checkForFire = function () {
+        player.checkForFire = function() {
             player.cooldown -= 60; // FPS
-            if ( player.firing ) {
-                if ( player.cooldown <= 0 ) {
+            if (player.firing) {
+                if (player.cooldown <= 0) {
                     player.fire();
                     player.cooldown = player.weapon.firerate;
                 }
@@ -415,35 +418,35 @@ var game = ( function () {
          * It also handles the sound of the shoot
          * @return {[type]}
          */
-        player.fire = function () {
+        player.fire = function() {
             var spreadStart = 0,
                 spacingStart = 0,
                 spreadStep = 0,
                 spacingStep = 0;
-            if ( player.weapon.count > 1 ) {
+            if (player.weapon.count > 1) {
                 spreadStart = -player.weapon.spread / 2;
                 spacingStart = player.weapon.spacing / 2;
                 spreadStep = player.weapon.spread / (player.weapon.count - 1);
-                spacingStep = player.weapon.spacing / (player.weapon.count -1);
+                spacingStep = player.weapon.spacing / (player.weapon.count - 1);
             }
 
             // Holy grial of the rotation
             var rotation = player.rotate * to_radians,
-                gunX = player.posX + Math.cos( rotation ) * 34 - Math.sin( rotation ) * 5,
-                gunY = player.posY + Math.sin( rotation ) * 34 + Math.cos( rotation ) * 5,
+                gunX = player.posX + Math.cos(rotation) * 34 - Math.sin(rotation) * 5,
+                gunY = player.posY + Math.sin(rotation) * 34 + Math.cos(rotation) * 5,
                 shot;
 
-            for( var i = 0; i < this.weapon.count; i++ ) {
-                var spacingOffsetX = Math.cos( rotation - Math.PI / 2) * ( spacingStart - i * spacingStep ),
-                    spacingOffsetY = Math.sin( rotation - Math.PI / 2) * ( spacingStart - i * spacingStep );
+            for (var i = 0, n = this.weapon.count; i < n; i++) {
+                var spacingOffsetX = Math.cos(rotation - Math.PI / 2) * (spacingStart - i * spacingStep),
+                    spacingOffsetY = Math.sin(rotation - Math.PI / 2) * (spacingStart - i * spacingStep);
 
-                shot = new Shot( {
-                    shot : this,
-                    direction : rotation + spreadStart + i * spreadStep,
-                    shotX : gunX + spacingOffsetX + Math.random() * player.weapon.chaos - player.weapon.chaos / 2,
-                    shotY : gunY + spacingOffsetY + Math.random() * player.weapon.chaos - player.weapon.chaos / 2,
-                    speed : player.weapon.speed
-                } );
+                shot = new Shot({
+                    shot: this,
+                    direction: rotation + spreadStart + i * spreadStep,
+                    shotX: gunX + spacingOffsetX + Math.random() * player.weapon.chaos - player.weapon.chaos / 2,
+                    shotY: gunY + spacingOffsetY + Math.random() * player.weapon.chaos - player.weapon.chaos / 2,
+                    speed: player.weapon.speed
+                });
                 shot.add();
             }
             playFx(musicList.length + FX.shot);
@@ -453,7 +456,7 @@ var game = ( function () {
          * Decrease speed of the ship
          * @return {[type]}
          */
-        player.focusOn = function () {
+        player.focusOn = function() {
             player.speed = 3;
             player.src = 'images/ship-focused.png';
         };
@@ -462,7 +465,7 @@ var game = ( function () {
          * Restore normal speed of the ship
          * @return {[type]}
          */
-        player.focusOff = function () {
+        player.focusOff = function() {
             player.speed = 7;
             player.src = 'images/ship.png';
         };
@@ -474,7 +477,7 @@ var game = ( function () {
      * Bullet object
      * @param {[type]} args
      */
-    function Shot( args ) {
+    function Shot(args) {
         args.shot = new Image();
         args.shot.src = 'images/shot.png'; //12x12
         args.shot.posX = args.shotX;
@@ -484,11 +487,11 @@ var game = ( function () {
         args.shot.color = args.color || 'F00';
 
         args.shot.add = function() {
-            shots.push( args.shot );
+            shots.push(args.shot);
         };
 
-        args.shot.del = function( id ) {
-            arrayRemove( shots, id );
+        args.shot.del = function(id) {
+            arrayRemove(shots, id);
         };
 
         return args.shot;
@@ -512,7 +515,7 @@ var game = ( function () {
          * @return {[type]}
          */
         boss.kill = function() {
-            particleManager.createExplosion( boss.posX, boss.posY, 130, 15, 70, 3, 0 );
+            particleManager.createExplosion(boss.posX, boss.posY, 130, 15, 70, 3, 0);
             score += 1000;
             bossMode = false;
         };
@@ -526,8 +529,8 @@ var game = ( function () {
     function Bugger(bugger) {
         bugger = new Image();
         bugger.src = 'images/bugger.png';
-        bugger.initPos = (Math.random() * ( background.height - 120 ) ) + 60;
-        bugger.posX = canvas.width + (Math.random() * ( canvas.width / 2 ) ) + 1;
+        bugger.initPos = (Math.random() * (background.height - 120)) + 60;
+        bugger.posX = canvas.width + (Math.random() * (canvas.width / 2)) + 1;
         bugger.posY = bugger.initPos;
         bugger.speed = 5;
 
@@ -540,8 +543,8 @@ var game = ( function () {
             bugger.posY -= 3 * Math.sin(bugger.initPos * Math.PI / 64);
             bugger.initPos++;
 
-            if ( bugger.posY < 0 ) { bugger.posY = 0; }
-            if ( bugger.posY > background.height - 100 ) { bugger.posY = background.height - 100; }
+            if (bugger.posY < 0) { bugger.posY = 0; }
+            if (bugger.posY > background.height - 100) { bugger.posY = background.height - 100; }
         };
         bugger.add = function() {
             buggers.push(bugger);
@@ -625,12 +628,12 @@ var game = ( function () {
      * Scroll Background
      * @param {obj} layers An oject with the backgounds to slide and speed.
      */
-    var scrollBackground = function ( layersGroup ) {
-        if ( ! Array.isArray( layersGroup ) ) {
-            layersGroup = [ layersGroup ];
+    var scrollBackground = function(layersGroup) {
+        if (! Array.isArray(layersGroup)) {
+            layersGroup = [layersGroup];
         }
 
-        layersGroup.forEach( function ( layers ) {
+        layersGroup.forEach(function(layers) {
             var settings = {
                 source: [],
                 orientation: 'horizontal',
@@ -638,42 +641,42 @@ var game = ( function () {
             },
             index, axis, magnitude, displace, calculateNewMove, newPosition, repeatFactor;
 
-            if ( layers.mirrorAtEnd ) {
+            if (layers.mirrorAtEnd) {
                 var mirror = background4;
 
-                layers.source.push( mirror );
+                layers.source.push(mirror);
             }
 
             index = layers.source.length;
-            extend( settings, layers );
+            extend(settings, layers);
 
             settings.speed = layers.speed ? bgSpeed * layers.speed : bgSpeed;
 
-            while ( index-- ) {
-                axis = ( settings.orientation === 'horizontal' ) ? 'X' : 'Y';
-                magnitude = ( settings.orientation === 'horizontal' ) ? 'width' : 'height';
-                displace = ( settings.moveTo === 'down' || settings.moveTo === 'right' ) ? 'negative' : 'positive';
-                repeatFactor = canvas.width / settings.source[ index ][ magnitude ];
+            while (index--) {
+                axis = (settings.orientation === 'horizontal') ? 'X' : 'Y';
+                magnitude = (settings.orientation === 'horizontal') ? 'width' : 'height';
+                displace = (settings.moveTo === 'down' || settings.moveTo === 'right') ? 'negative' : 'positive';
+                repeatFactor = canvas.width / settings.source[index][magnitude];
 
                 if (displace === 'positive') {
-                    settings.source[ index ][ 'pos' + axis ] -= settings.speed;
+                    settings.source[index]['pos' + axis] -= settings.speed;
                 } else {
-                    settings.source[ index ][ 'pos' + axis ] += settings.speed;
+                    settings.source[index]['pos' + axis] += settings.speed;
                 }
 
-                calculateNewMove = ( displace === 'positive' ) ?
-                    settings.source[ index ][ 'pos' + axis ] + settings.source[ index ][ magnitude ] > 0 :
-                    settings.source[ index ][ 'pos' + axis ] < settings.source[ index ][ magnitude ];
+                calculateNewMove = (displace === 'positive') ?
+                    settings.source[index]['pos' + axis] + settings.source[index][magnitude] > 0 :
+                    settings.source[index]['pos' + axis] < settings.source[index][magnitude];
 
-                if ( calculateNewMove ) {
-                    newPosition = settings.source[ index ][ 'pos' + axis ];
-                    bufferctx.drawImage( settings.source[ index ], ( axis === 'X' ) ? newPosition : 0, ( axis === 'Y' ) ? newPosition : 0 );
+                if (calculateNewMove) {
+                    newPosition = settings.source[index]['pos' + axis];
+                    bufferctx.drawImage(settings.source[index], (axis === 'X') ? newPosition : 0, (axis === 'Y') ? newPosition : 0);
                 } else {
-                    newPosition = settings.source[ index ][ magnitude ] * ( layers.source.length - ( layers.source.length % 4 ? 1 : 2 ) );
-                    settings.source[ index ][ 'pos' + axis ] = ( displace === 'positive' ) ? newPosition : Math.abs( newPosition ) * -1;
+                    newPosition = settings.source[index][magnitude] * (layers.source.length - (layers.source.length % 4 ? 1 : 2));
+                    settings.source[index]['pos' + axis] = (displace === 'positive') ? newPosition : Math.abs(newPosition) * -1;
                 }
             }
-        } );
+        });
     };
 
     /**
@@ -685,11 +688,11 @@ var game = ( function () {
      * @param  {[type]} angle
      * @return {[type]}
      */
-    function renderImage ( image, ctxTmp, x, y, angle ) {
+    function renderImage(image, ctxTmp, x, y, angle) {
         ctxTmp.save();
-        ctxTmp.translate( x, y );
-        ctxTmp.rotate( angle * to_radians );
-        ctxTmp.drawImage( image, - ( image.width / 2 ), - ( image.height / 2 ) );
+        ctxTmp.translate(x, y);
+        ctxTmp.rotate(angle * to_radians);
+        ctxTmp.drawImage(image, - (image.width / 2), - (image.height / 2));
         ctxTmp.restore();
     }
 
@@ -697,9 +700,9 @@ var game = ( function () {
      * Rotate player to the left
      * @return {[type]}
      */
-    function rotateLeft () {
+    function rotateLeft() {
         player.rotate -= 5;
-        if ( player.rotate <= -360 ) {
+        if (player.rotate <= -360) {
             player.rotate = 0;
         }
     }
@@ -708,9 +711,9 @@ var game = ( function () {
      * Rotate player to the right
      * @return {[type]}
      */
-    function rotateRight () {
+    function rotateRight() {
         player.rotate += 5;
-        if ( player.rotate >= 360 ) {
+        if (player.rotate >= 360) {
             player.rotate = 0;
         }
     }
@@ -730,17 +733,17 @@ var game = ( function () {
             return false;
         }
 
-        if (keyPressed.up && player.posY > ( player.height / 2 ) ) {
+        if (keyPressed.up && player.posY > (player.height / 2)) {
             player.posY -= player.speed;
         }
-        if (keyPressed.down && player.posY < ( canvas.height - player.height / 2 ) &&
+        if (keyPressed.down && player.posY < (canvas.height - player.height / 2) &&
                 player.posY < background.height) {
             player.posY += player.speed;
         }
-        if (keyPressed.left && player.posX > ( player.width / 2 ) ) {
+        if (keyPressed.left && player.posX > (player.width / 2)) {
             player.posX -= player.speed;
         }
-        if (keyPressed.right && player.posX < ( canvas.width - player.width / 2 ) ) {
+        if (keyPressed.right && player.posX < (canvas.width - player.width / 2)) {
             player.posX += player.speed;
         }
         if (keyPressed.rotateLeft) {
@@ -845,7 +848,7 @@ var game = ( function () {
      */
     function keyDown(e) {
         var key = (window.event ? e.keyCode : e.which);
-        for ( var inkey in keyMap ) {
+        for (var inkey in keyMap) {
             if (key === keyMap[inkey]) {
                 e.preventDefault();
                 keyPressed[inkey] = true;
@@ -883,8 +886,8 @@ var game = ( function () {
      * Create the bomb effect
      * @return {[type]}
      */
-    function bomb () {
-        if ( player.bombing ) {
+    function bomb() {
+        if (player.bombing) {
             return;
         }
 
@@ -893,13 +896,13 @@ var game = ( function () {
         playFx(musicList.length + FX.bomb);
 
         // BOMB
-        particleManager.createExplosion( 0, 0, 130, 15, 70, 3, 0 );
-        particleManager.createExplosion( canvas.width, 0, 130, 15, 70, 3, 0 );
-        particleManager.createExplosion( 0, background.height, 130, 15, 70, 3, 0 );
-        particleManager.createExplosion( canvas.width, background.height, 130, 15, 70, 3, 0 );
-        particleManager.createExplosion( canvas.width / 2, background.height / 2, 100, 10, 70, 3, 0, function () {
-            setTimeout( function () { player.bombing = false; }, 1500 );
-        } );
+        particleManager.createExplosion(0, 0, 130, 15, 70, 3, 0);
+        particleManager.createExplosion(canvas.width, 0, 130, 15, 70, 3, 0);
+        particleManager.createExplosion(0, background.height, 130, 15, 70, 3, 0);
+        particleManager.createExplosion(canvas.width, background.height, 130, 15, 70, 3, 0);
+        particleManager.createExplosion(canvas.width / 2, background.height / 2, 100, 10, 70, 3, 0, function() {
+            setTimeout(function() { player.bombing = false; }, 1500);
+        });
 
         destroyBuggers();
     }
@@ -909,8 +912,8 @@ var game = ( function () {
      * @return {[type]}
      */
     function update() {
-        scrollBackground( [ {
-            source: [background, background2, background3, background4, background4Mirror, background3Mirror, background2Mirror, backgroundMirror ],
+        scrollBackground([{
+            source: [background, background2, background3, background4, background4Mirror, background3Mirror, background2Mirror, backgroundMirror],
             speed: 0.5,
             orientation: 'horizontal',
             moveTo: 'left'
@@ -924,9 +927,9 @@ var game = ( function () {
             speed: 7,
             orientation: 'horizontal',
             moveTo: 'left'
-        } ] );
+        }]);
 
-        renderImage( player, bufferctx, player.posX, player.posY, player.rotate );
+        renderImage(player, bufferctx, player.posX, player.posY, player.rotate);
 
         if (bossMode) {
             bufferctx.drawImage(boss, boss.posX, boss.posY);
@@ -939,16 +942,16 @@ var game = ( function () {
         if (shots.length > 0) {
             shots.forEach(function(shot, index) {
                 shot.id = index;
-                if (!bossMode || !checkCollisionsShot( shot ) ) {
-                    shot.posX += Math.cos( shot.direction ) * shot.speed;
-                    shot.posY += Math.sin( shot.direction ) * shot.speed;
+                if (!bossMode || !checkCollisionsShot(shot)) {
+                    shot.posX += Math.cos(shot.direction) * shot.speed;
+                    shot.posY += Math.sin(shot.direction) * shot.speed;
 
                     // Remove if offcanvas
-                    if ( shot.posX < 0 || shot.posY < 0 || shot.posX > canvas.width || shot.posY > canvas.height ) {
-                        shot.del( parseInt( shot.id, 10 ) );
+                    if (shot.posX < 0 || shot.posY < 0 || shot.posX > canvas.width || shot.posY > canvas.height) {
+                        shot.del(parseInt(shot.id, 10));
                     }
 
-                    bufferctx.drawImage( shot, shot.posX, shot.posY);
+                    bufferctx.drawImage(shot, shot.posX, shot.posY);
                 }
             });
         }
@@ -996,9 +999,9 @@ var game = ( function () {
      * @param  {[type]} y
      * @return {[type]}
      */
-    function makeExplosion (x, y) {
+    function makeExplosion(x, y) {
         // Parametros del particleManager: posX, posY, size, area, life, speed, gravity
-        particleManager.createExplosion(x, y, 25, 4, 70, 3, 0.1 );
+        particleManager.createExplosion(x, y, 25, 4, 70, 3, 0.1);
     }
 
     /**
@@ -1008,7 +1011,7 @@ var game = ( function () {
     function ParticleManager(n) {
         var t = [],
             i = n;
-        this.draw = function () {
+        this.draw = function() {
             for (var r = [], n = t.length - 1; n >= 0; n--) {
                 t[n].moves++;
                 t[n].x += t[n].xunits;
@@ -1022,7 +1025,7 @@ var game = ( function () {
             }
             t = r;
         };
-        this.createExplosion = function (n, i, r, u, f, e, o, fn) {
+        this.createExplosion = function(n, i, r, u, f, e, o, fn) {
             var s, h;
             for (n = n - r * 0.5, i = i - r * 0.5, e = r * e * 0.01, s = 1; s < u; s++) {
                 for (h = 0; h < 10 * s; h++) {
@@ -1046,7 +1049,7 @@ var game = ( function () {
      * @param  {[type]} e
      * @return {[type]}
      */
-    function particle (n, t, i, r, u, f, e) {
+    function particle(n, t, i, r, u, f, e) {
         var s = Math.floor(Math.random() * 360),
             o = s * Math.PI / 180;
         return {
@@ -1098,7 +1101,7 @@ var game = ( function () {
         bufferctx.fillText('[2] -> Boss Mode', 10, canvas.height - 30);
         bufferctx.fillText('[X] -> Shoot', 10, canvas.height - 10);
 
-        bufferctx.fillText('[C] -> Bombs', 150, canvas.height -70);
+        bufferctx.fillText('[C] -> Bombs', 150, canvas.height - 70);
         bufferctx.fillText('[Z] -> Focus', 150, canvas.height - 50);
         bufferctx.fillText('[A] -> Rotate left', 150, canvas.height - 30);
         bufferctx.fillText('[D] -> Rotate right', 150, canvas.height - 10);
@@ -1119,4 +1122,4 @@ var game = ( function () {
         init: init
     };
 
-} ) ();
+})();

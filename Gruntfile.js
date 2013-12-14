@@ -40,7 +40,8 @@ module.exports = function (grunt) {
         gjslint: {
             options: {
                 flags: [
-                    '--disable 220' //ignore error code 220 from gjslint
+                    '--disable 220', //ignore error code 220 from gjslint
+                    '--disable 110' // ignore line too long
                     ],
                 reporter: {
                     name: 'console'
