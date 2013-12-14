@@ -8,8 +8,8 @@ function BufferLoader(context, urlList, callback) {
     this.loadBuffer = function(url, index) {
         // Load buffer asynchronously
         var request = new XMLHttpRequest();
-        request.open("GET", url, true);
-        request.responseType = "arraybuffer";
+        request.open('GET', url, true);
+        request.responseType = 'arraybuffer';
 
         var loader = this;
 
@@ -23,7 +23,9 @@ function BufferLoader(context, urlList, callback) {
                     return;
                 }
                 loader.bufferList[index] = buffer;
-                if (++loader.loadCount == loader.urlList.length) loader.onload(loader.bufferList);
+                if (++loader.loadCount === loader.urlList.length) {
+                    loader.onload(loader.bufferList);
+                }
             },
             function(error) {
                 console.error('decodeAudioData error', error);
@@ -36,7 +38,8 @@ function BufferLoader(context, urlList, callback) {
     };
 
     this.load = function() {
-        for (var i = 0; i < this.urlList.length; ++i)
+        for (var i = 0; i < this.urlList.length; ++i) {
             this.loadBuffer(this.urlList[i], i);
+        }
     };
 }
