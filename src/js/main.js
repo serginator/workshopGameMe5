@@ -80,7 +80,7 @@ var game = ( function () {
             bomb: 0,
             shot: 1,
             explosion: 2
-        };
+        },
         score = 0,
         buggerMode = false,
         bossMode = false;
@@ -141,15 +141,15 @@ var game = ( function () {
         buggersCount = ( canvas.height / 40 ) * 15;
 
         // Particle System
-        fireParticle = new Image;
-        fireParticle.src = "images/fire.png";
+        fireParticle = new Image();
+        fireParticle.src = 'images/fire.png';
         particleManager = new ParticleManager( bufferctx );
 
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         audioCtx = new window.AudioContext();
 
         // Audio stuff
-        audioBuffer = new BufferLoader(audioCtx, musicList.concat(fxList), createAudioSources);
+        audioBuffer = new window.BufferLoader(audioCtx, musicList.concat(fxList), createAudioSources);
         audioBuffer.load();
 
         setTimeout(function() {
@@ -253,12 +253,13 @@ var game = ( function () {
      * @return {[type]}
      */
     function createAudioSources(list) {
+        var i, n;
         audioMusic = [];
         gainNode = audioCtx.createGain();
-        for (var i = 0, n = musicList.length; i < n; i++) {
+        for (i = 0, n = musicList.length; i < n; i++) {
             setAudioSource(i);
         }
-        for (var i = musicList.length, n = i + fxList.length; i < n; i++) {
+        for (i = musicList.length, n = i + fxList.length; i < n; i++) {
             setAudioSource(i);
             audioMusic[i].loop = false;
         }
@@ -347,7 +348,7 @@ var game = ( function () {
            spreadBase: 9,
            spacing: 0,
            speed: 30,
-           color: "#00ffff",
+           color: '#00ffff',
            shape: 0,
            firerate: 20
         };
@@ -373,7 +374,7 @@ var game = ( function () {
                 player.weapon.spreadBase -= 0.2;
                 player.weapon.spread = Math.PI / player.weapon.spreadBase;
             }
-        }
+        };
 
         /**
          * Increase power fire
@@ -407,7 +408,7 @@ var game = ( function () {
                     player.cooldown = player.weapon.firerate;
                 }
             }
-        }
+        };
 
         /**
          * Method to calculate position of the shoots and add more of them.
@@ -415,22 +416,22 @@ var game = ( function () {
          * @return {[type]}
          */
         player.fire = function () {
+            var spreadStart = 0,
+                spacingStart = 0,
+                spreadStep = 0,
+                spacingStep = 0;
             if ( player.weapon.count > 1 ) {
-                var spreadStart = -player.weapon.spread / 2,
-                    spacingStart = player.weapon.spacing / 2,
-                    spreadStep = player.weapon.spread / (player.weapon.count - 1),
-                    spacingStep = player.weapon.spacing / (player.weapon.count -1);
-            } else {
-                var spreadStart = 0,
-                    spacingStart = 0,
-                    spreadStep = 0,
-                    spacingStep = 0;
+                spreadStart = -player.weapon.spread / 2;
+                spacingStart = player.weapon.spacing / 2;
+                spreadStep = player.weapon.spread / (player.weapon.count - 1);
+                spacingStep = player.weapon.spacing / (player.weapon.count -1);
             }
 
             // Holy grial of the rotation
             var rotation = player.rotate * to_radians,
                 gunX = player.posX + Math.cos( rotation ) * 34 - Math.sin( rotation ) * 5,
-                gunY = player.posY + Math.sin( rotation ) * 34 + Math.cos( rotation ) * 5;
+                gunY = player.posY + Math.sin( rotation ) * 34 + Math.cos( rotation ) * 5,
+                shot;
 
             for( var i = 0; i < this.weapon.count; i++ ) {
                 var spacingOffsetX = Math.cos( rotation - Math.PI / 2) * ( spacingStart - i * spacingStep ),
@@ -455,7 +456,7 @@ var game = ( function () {
         player.focusOn = function () {
             player.speed = 3;
             player.src = 'images/ship-focused.png';
-        }
+        };
 
         /**
          * Restore normal speed of the ship
@@ -464,7 +465,7 @@ var game = ( function () {
         player.focusOff = function () {
             player.speed = 7;
             player.src = 'images/ship.png';
-        }
+        };
 
         return player;
     }
@@ -480,10 +481,10 @@ var game = ( function () {
         args.shot.posY = args.shotY;
         args.shot.direction = args.direction || 0;
         args.shot.speed = args.speed || 256;
-        args.shot.color = args.color || "F00";
+        args.shot.color = args.color || 'F00';
 
         args.shot.add = function() {
-            shots.push( shot );
+            shots.push( args.shot );
         };
 
         args.shot.del = function( id ) {
@@ -586,7 +587,11 @@ var game = ( function () {
      */
     function checkCollisionsShot(shot) {
         return checkCollision(shot, boss, function() {
-            (boss.life > 1) ? boss.life-- : boss.kill();
+            if (boss.life > 1) {
+                boss.life--;
+            } else {
+                boss.kill();
+            }
             shot.del(parseInt(shot.id, 10));
             score += 10;
         });
@@ -621,7 +626,9 @@ var game = ( function () {
      * @param {obj} layers An oject with the backgounds to slide and speed.
      */
     var scrollBackground = function ( layersGroup ) {
-        if ( ! Array.isArray( layersGroup ) ) layersGroup = [ layersGroup ];
+        if ( ! Array.isArray( layersGroup ) ) {
+            layersGroup = [ layersGroup ];
+        }
 
         layersGroup.forEach( function ( layers ) {
             var settings = {
@@ -648,13 +655,15 @@ var game = ( function () {
                 displace = ( settings.moveTo === 'down' || settings.moveTo === 'right' ) ? 'negative' : 'positive';
                 repeatFactor = canvas.width / settings.source[ index ][ magnitude ];
 
-                displace === 'positive'
-                    ? settings.source[ index ][ 'pos' + axis ] -= settings.speed
-                    : settings.source[ index ][ 'pos' + axis ] += settings.speed;
+                if (displace === 'positive') {
+                    settings.source[ index ][ 'pos' + axis ] -= settings.speed;
+                } else {
+                    settings.source[ index ][ 'pos' + axis ] += settings.speed;
+                }
 
-                calculateNewMove = ( displace === 'positive' )
-                    ? settings.source[ index ][ 'pos' + axis ] + settings.source[ index ][ magnitude ] > 0
-                    : settings.source[ index ][ 'pos' + axis ] < settings.source[ index ][ magnitude ];
+                calculateNewMove = ( displace === 'positive' ) ?
+                    settings.source[ index ][ 'pos' + axis ] + settings.source[ index ][ magnitude ] > 0 :
+                    settings.source[ index ][ 'pos' + axis ] < settings.source[ index ][ magnitude ];
 
                 if ( calculateNewMove ) {
                     newPosition = settings.source[ index ][ 'pos' + axis ];
@@ -690,7 +699,9 @@ var game = ( function () {
      */
     function rotateLeft () {
         player.rotate -= 5;
-        if ( player.rotate <= -360 ) player.rotate = 0;
+        if ( player.rotate <= -360 ) {
+            player.rotate = 0;
+        }
     }
 
     /**
@@ -699,7 +710,9 @@ var game = ( function () {
      */
     function rotateRight () {
         player.rotate += 5;
-        if ( player.rotate >= 360 ) player.rotate = 0;
+        if ( player.rotate >= 360 ) {
+            player.rotate = 0;
+        }
     }
 
     /**
@@ -847,7 +860,7 @@ var game = ( function () {
      */
     function keyUp(e) {
         var key = (window.event ? e.keyCode : e.which);
-        if (key === 84 || key == 77) {
+        if (key === 84 || key === 77) {
             changingMusic = false;
         }
         for (var inkey in keyMap) {
@@ -923,33 +936,37 @@ var game = ( function () {
         player.checkForFire();
 
         // Checks collisions of bullets, updates positions and draws the images
-        shots.length > 0 && shots.forEach( function ( shot, index ) {
-            shot.id = index;
-            if (!bossMode || !checkCollisionsShot( shot ) ) {
-                shot.posX += Math.cos( shot.direction ) * shot.speed;
-                shot.posY += Math.sin( shot.direction ) * shot.speed;
+        if (shots.length > 0) {
+            shots.forEach(function(shot, index) {
+                shot.id = index;
+                if (!bossMode || !checkCollisionsShot( shot ) ) {
+                    shot.posX += Math.cos( shot.direction ) * shot.speed;
+                    shot.posY += Math.sin( shot.direction ) * shot.speed;
 
-                // Remove if offcanvas
-                if ( shot.posX < 0 || shot.posY < 0 || shot.posX > canvas.width || shot.posY > canvas.height ) {
-                    shot.del( parseInt( shot.id, 10 ) );
+                    // Remove if offcanvas
+                    if ( shot.posX < 0 || shot.posY < 0 || shot.posX > canvas.width || shot.posY > canvas.height ) {
+                        shot.del( parseInt( shot.id, 10 ) );
+                    }
+
+                    bufferctx.drawImage( shot, shot.posX, shot.posY);
                 }
-
-                bufferctx.drawImage( shot, shot.posX, shot.posY);
-            }
-        } );
+            });
+        }
 
         // Checks collisions of buggers, updates positions and draws the images
-        buggerMode && buggers.length > 0 && buggers.forEach(function(bugger, index) {
-            bugger.id = index;
-            //colisiones
-            if (!checkCollisionsBugger(bugger)) {
-                bugger.update();
-                if (bugger.posX < 0 || bugger.posX > canvas.width) {
-                    bugger.del(parseInt(bugger.id, 10));
+        if (buggerMode && buggers.length > 0) {
+            buggers.forEach(function(bugger, index) {
+                bugger.id = index;
+                //colisiones
+                if (!checkCollisionsBugger(bugger)) {
+                    bugger.update();
+                    if (bugger.posX < 0 || bugger.posX > canvas.width) {
+                        bugger.del(parseInt(bugger.id, 10));
+                    }
+                    bufferctx.drawImage(bugger, bugger.posX, bugger.posY);
                 }
-                bufferctx.drawImage(bugger, bugger.posX, bugger.posY);
-            }
-        });
+            });
+        }
 
         // Create more buggers when they are destroyed
         if (buggerMode && player.bombing === false) {
@@ -962,7 +979,7 @@ var game = ( function () {
         bufferctx.font = 'italic 25px arial';
 
         if (bossMode) {
-            bufferctx.fillStyle = "#f00";
+            bufferctx.fillStyle = '#f00';
             bufferctx.fillText(boss.life, boss.posX - 23 + boss.width / 2, boss.posY - 20);
         }
 
@@ -992,17 +1009,30 @@ var game = ( function () {
         var t = [],
             i = n;
         this.draw = function () {
-            for (var r = [], n = t.length - 1; n >= 0; n--) t[n].moves++, t[n].x += t[n].xunits, t[n].y += t[n].yunits + t[n].gravity * t[n].moves, t[n].moves < t[n].life && (r.push(t[n]), i.globalAlpha = 5 / t[n].moves, i.drawImage(fireParticle, Math.floor(t[n].x), Math.floor(t[n].y), t[n].width, t[n].height), i.globalAlpha = 1);
-            t = r;
-        }, this.createExplosion = function (n, i, r, u, f, e, o, fn) {
-            var e, s, h;
-            for (n = n - r * .5, i = i - r * .5, e = r * e * .01, s = 1; s < u; s++) {
-                for (h = 0; h < 10 * s; h++) {
-                    t.push(particle(n, i, r, r, s * e, o, f))
+            for (var r = [], n = t.length - 1; n >= 0; n--) {
+                t[n].moves++;
+                t[n].x += t[n].xunits;
+                t[n].y += t[n].yunits + t[n].gravity * t[n].moves;
+                if (t[n].moves < t[n].life) {
+                    r.push(t[n]);
+                    i.globalAlpha = 5 / t[n].moves;
+                    i.drawImage(fireParticle, Math.floor(t[n].x), Math.floor(t[n].y), t[n].width, t[n].height);
+                    i.globalAlpha = 1;
                 }
             }
-            fn && fn();
-        }
+            t = r;
+        };
+        this.createExplosion = function (n, i, r, u, f, e, o, fn) {
+            var s, h;
+            for (n = n - r * 0.5, i = i - r * 0.5, e = r * e * 0.01, s = 1; s < u; s++) {
+                for (h = 0; h < 10 * s; h++) {
+                    t.push(particle(n, i, r, r, s * e, o, f));
+                }
+            }
+            if (fn) {
+                fn();
+            }
+        };
     }
 
     /**
@@ -1031,7 +1061,7 @@ var game = ( function () {
             yunits: Math.sin(o) * u,
             moves: 0
         };
-    };
+    }
 
     /**
      * Method to create buggers
@@ -1051,7 +1081,7 @@ var game = ( function () {
      */
     function destroyBuggers() {
         buggers.forEach(function(bugger, index) {
-            delete bugger;
+            bugger = null;
         });
         buggers.length = 0;
     }
