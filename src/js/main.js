@@ -525,7 +525,7 @@ var game = (function() {
                 });
                 shot.add();
             }
-            playFx(musicList.length + FX.shot);
+            allowMusicChange && playFx(musicList.length + FX.shot);
         };
 
         /**
@@ -651,7 +651,7 @@ var game = (function() {
                 (a.posY <= bY && bY < (a.posY + a.width))) {
                 callback();
                 makeExplosion(a.posX, a.posY);
-                playFx(musicList.length + FX.explosion);
+                allowMusicChange && playFx(musicList.length + FX.explosion);
                 return true;
             }
         }
@@ -968,7 +968,7 @@ var game = (function() {
 
         player.bombing = true;
 
-        playFx(musicList.length + FX.bomb);
+        allowMusicChange && playFx(musicList.length + FX.bomb);
 
         // BOMB
         particleManager.createExplosion(0, 0, 130, 15, 70, 3, 0);
