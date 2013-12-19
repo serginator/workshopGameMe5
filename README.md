@@ -4,6 +4,9 @@ Demo para el taller de GameMe5 2013
 13-12-13
 por [@EtnasSoft](http://twitter.com/etnassoft) y [@serginator](http://twitter.com/serginator)
 
+## Enhanced version
+En esta versión se pretende arreglar el preloading de recursos sin utilizar timeouts, además de hacer la demo compatible con Chrome y Firefox por igual, y tal vez añadir la parte de gamepad y touch que faltó.
+
 ## Resources
 * Charla de [@EtnasSoft](http://twitter.com/etnassoft) y [@serginator](http://twitter.com/serginator) en Camon
    * [Video](http://vimeo.com/39259983)
