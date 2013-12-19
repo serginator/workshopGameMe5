@@ -131,7 +131,7 @@ var game = (function() {
         buggerMode = false,
         bossMode = false;
 
-    function preLoadImages() {
+    function preloadImages() {
         var loaded = 0,
             total = imagesList.length;
         for (var i = 0; i < total; i++) {
@@ -140,10 +140,26 @@ var game = (function() {
             img.onload = function() {
                 loaded++;
                 if (loaded === total) {
-                    init(true);
+                    preloadMusic();
                 }
             };
             images.push(img);
+        }
+    }
+
+    function preloadMusic() {
+        var loaded = 0,
+            fxAndMusic = musicList.concat(fxList),
+            total = fxAndMusic.length;
+        for (var i = 0; i < total; i++) {
+            var audio = new Audio();
+            audio.addEventListener('canplaythrough', function() {
+                loaded++;
+                if (loaded === total) {
+                    init(true);
+                }
+            }, false);
+            audio.src = fxAndMusic[i];
         }
     }
 
@@ -200,7 +216,7 @@ var game = (function() {
             ctx.textBaseline = 'bottom';
             ctx.fillText('Loading...', buffer.width - 200, buffer.height - 50);
 
-            preLoadImages();
+            preloadImages();
         } else {
             // Adjusting buggers
             buggersCount = (canvas.height / 40) * 15;
@@ -216,7 +232,6 @@ var game = (function() {
             audioBuffer = new window.BufferLoader(audioCtx, musicList.concat(fxList), createAudioSources);
             audioBuffer.load();
 
-            setTimeout(function() {
                 // Load resources
                 // Background pattern
                 background = new Image();
@@ -304,7 +319,6 @@ var game = (function() {
                     window.requestAnimFrame(anim);
                 };
                 anim();
-            }, 10000);
         }
     }
 
@@ -325,7 +339,6 @@ var game = (function() {
             audioMusic[i].loop = false;
         }
         gainNode.connect(audioCtx.destination);
-        gainNode.gain.value = 0;
         audioMusic[0].start(0);
     }
 
