@@ -113,14 +113,14 @@ var game = (function() {
         audioCtx, audioBuffer, audioMusic, currentAudioMusic, gainNode,
         changingMusic = false,
         musicList = [
-            'Music/16-bits-TFIV-Stand-Up-Against-Myself.ogg',
-            'Music/32-bits-TFV-Steel-Of-Destiny.ogg',
-            'Music/128-bits-Ikaruga-Ideal.ogg'
+            'music/16-bits-TFIV-Stand-Up-Against-Myself.ogg',
+            'music/32-bits-TFV-Steel-Of-Destiny.ogg',
+            'music/128-bits-Ikaruga-Ideal.ogg'
         ],
         fxList = [
-            'Music/FX/bomb.ogg',
-            'Music/FX/shot.ogg',
-            'Music/FX/explosion.ogg'
+            'music/FX/bomb.ogg',
+            'music/FX/shot.ogg',
+            'music/FX/explosion.ogg'
         ],
         FX = {
             bomb: 0,
