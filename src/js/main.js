@@ -67,17 +67,60 @@ var game = (function() {
         player, boss,
         buggers = [],
         buggersCount,
+        imagesList = [
+            'images/fire.png',
+            'images/background-1.jpg',
+            'images/background-2.jpg',
+            'images/background-3.jpg',
+            'images/background-4.jpg',
+            'images/background-4-mirror.jpg',
+            'images/background-3-mirror.jpg',
+            'images/background-2-mirror.jpg',
+            'images/background-1-mirror.jpg',
+            'images/foreground-1.png',
+            'images/foreground-2.png',
+            'images/foreground-3.png',
+            'images/foreground-4.png',
+            'images/starfield-2.png',
+            'images/ship.png',
+            'images/ship-focused.png',
+            'images/shot.png',
+            'images/boss.png',
+            'images/bugger.png'
+        ],
+        images = [],
+        IMG = {
+            fire: 0,
+            background1: 1,
+            background2: 2,
+            background3: 3,
+            background4: 4,
+            background4m: 5,
+            background3m: 6,
+            background2m: 7,
+            background1m: 8,
+            foreground1: 9,
+            foreground2: 10,
+            foreground3: 11,
+            foreground4: 12,
+            starfield: 13,
+            ship: 14,
+            shipFocused: 15,
+            shot: 16,
+            boss: 17,
+            bugger: 18
+        },
         audioCtx, audioBuffer, audioMusic, currentAudioMusic, gainNode,
         changingMusic = false,
         musicList = [
-            'Music/MP3/16-bits-TFIV-Stand-Up-Against-Myself.mp3',
-            'Music/MP3/32-bits-TFV-Steel-Of-Destiny.mp3',
-            'Music/MP3/128-bits-Ikaruga-Ideal.mp3'
+            'Music/16-bits-TFIV-Stand-Up-Against-Myself.ogg',
+            'Music/32-bits-TFV-Steel-Of-Destiny.ogg',
+            'Music/128-bits-Ikaruga-Ideal.ogg'
         ],
         fxList = [
-            'Music/FX/bomb.mp3',
-            'Music/FX/shot.mp3',
-            'Music/FX/explosion.mp3'
+            'Music/FX/bomb.ogg',
+            'Music/FX/shot.ogg',
+            'Music/FX/explosion.ogg'
         ],
         FX = {
             bomb: 0,
@@ -87,6 +130,22 @@ var game = (function() {
         score = 0,
         buggerMode = false,
         bossMode = false;
+
+    function preLoadImages() {
+        var loaded = 0,
+            total = imagesList.length;
+        for (var i = 0; i < total; i++) {
+            var img = new Image();
+            img.src = imagesList[i];
+            img.onload = function() {
+                loaded++;
+                if (loaded === total) {
+                    init(true);
+                }
+            };
+            images.push(img);
+        }
+    }
 
     /**
      * Main game loop
@@ -124,86 +183,75 @@ var game = (function() {
 
     /**
      * Init vars, load assets and start the main animation.
+     * @param {Boolean} ready If true, launch the app, if false, preload images
      * @return {[type]}
      */
-    function init() {
-        canvas = document.getElementById('canvas');
-        ctx = canvas.getContext('2d');
+    function init(ready) {
+        if (!ready) {
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
 
+            // Buffering
+            buffer = document.createElement('canvas');
+            bufferctx = buffer.getContext('2d');
 
-        // Buffering
-        buffer = document.createElement('canvas');
-        bufferctx = buffer.getContext('2d');
+            ctx.fillStyle = '#fff';
+            ctx.font = 'italic 25px arial';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText('Loading...', buffer.width - 200, buffer.height - 50);
 
-        ctx.fillStyle = '#fff';
-        ctx.font = 'italic 25px arial';
-        ctx.textBaseline = 'bottom';
-        ctx.fillText('Loading...', buffer.width - 200, buffer.height - 50);
+            preLoadImages();
+        } else {
+            // Adjusting buggers
+            buggersCount = (canvas.height / 40) * 15;
 
-        // Adjusting buggers
-        buggersCount = (canvas.height / 40) * 15;
+            // Particle System
+            fireParticle = images[IMG.fire];
+            particleManager = new ParticleManager(bufferctx);
 
-        // Particle System
-        fireParticle = new Image();
-        fireParticle.src = 'images/fire.png';
-        particleManager = new ParticleManager(bufferctx);
+            window.AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new window.AudioContext();
 
-        window.AudioContext = window.AudioContext || window.webkitAudioContext;
-        audioCtx = new window.AudioContext();
+            // Audio stuff
+            audioBuffer = new window.BufferLoader(audioCtx, musicList.concat(fxList), createAudioSources);
+            audioBuffer.load();
 
-        // Audio stuff
-        audioBuffer = new window.BufferLoader(audioCtx, musicList.concat(fxList), createAudioSources);
-        audioBuffer.load();
-
-        setTimeout(function() {
             // Load resources
             // Background pattern
-            background = new Image();
-            background.src = 'images/background-1.jpg';
+            background = images[IMG.background1];
             background.posX = 0;
 
-            background2 = new Image();
-            background2.src = 'images/background-2.jpg';
+            background2 = images[IMG.background2];
             background2.posX = background.width;
 
-            background3 = new Image();
-            background3.src = 'images/background-3.jpg';
+            background3 = images[IMG.background3];
             background3.posX = background.width * 2;
 
-            background4 = new Image();
-            background4.src = 'images/background-4.jpg';
+            background4 = images[IMG.background4];
             background4.posX = background.width * 3;
 
-            backgroundMirror = new Image();
-            backgroundMirror.src = 'images/background-4-mirror.jpg';
+            backgroundMirror = images[IMG.background4m];
             backgroundMirror.posX = background.width * 4;
 
-            background2Mirror = new Image();
-            background2Mirror.src = 'images/background-3-mirror.jpg';
+            background2Mirror = images[IMG.background3m];
             background2Mirror.posX = background.width * 5;
 
-            background3Mirror = new Image();
-            background3Mirror.src = 'images/background-2-mirror.jpg';
+            background3Mirror = images[IMG.background2m];
             background3Mirror.posX = background.width * 6;
 
-            background4Mirror = new Image();
-            background4Mirror.src = 'images/background-1-mirror.jpg';
+            background4Mirror = images[IMG.background1m];
             background4Mirror.posX = 0;
 
-            foreground = new Image();
-            foreground.src = 'images/foreground-1.png';
+            foreground = images[IMG.foreground1];
             foreground.posX = 0;
 
-            foreground2 = new Image();
-            foreground2.src = 'images/foreground-2.png';
+            foreground2 = images[IMG.foreground2];
             foreground2.posX = foreground.width;
 
-            foreground3 = new Image();
-            foreground3.src = 'images/foreground-3.png';
+            foreground3 = images[IMG.foreground3];
             foreground3.posX = foreground.width * 2;
 
-            foreground4 = new Image();
-            foreground4.src = 'images/foreground-4.png';
+            foreground4 = images[IMG.foreground4];
             foreground4.posX = foreground.width * 3;
 
             starfield = new Image();
@@ -211,23 +259,23 @@ var game = (function() {
             starfield.posX = 0;
 
             starfield2 = new Image();
-            starfield2.src = 'images/starfield-2.png';
+            starfield.src = 'images/starfield-2.png';
             starfield2.posX = starfield.width;
 
             starfield3 = new Image();
-            starfield3.src = 'images/starfield-2.png';
+            starfield.src = 'images/starfield-2.png';
             starfield3.posX = starfield.width * 2;
 
             starfield4 = new Image();
-            starfield4.src = 'images/starfield-2.png';
+            starfield.src = 'images/starfield-2.png';
             starfield4.posX = starfield.width * 3;
 
             starfield5 = new Image();
-            starfield5.src = 'images/starfield-2.png';
+            starfield.src = 'images/starfield-2.png';
             starfield5.posX = starfield.width * 4;
 
             starfield6 = new Image();
-            starfield6.src = 'images/starfield-2.png';
+            starfield.src = 'images/starfield-2.png';
             starfield6.posX = starfield.width * 5;
 
             currentAudioMusic = 0;
@@ -247,7 +295,7 @@ var game = (function() {
                 window.requestAnimFrame(anim);
             };
             anim();
-        }, 3000);
+        }
     }
 
     /**
@@ -330,8 +378,7 @@ var game = (function() {
      * @param {[type]} player
      */
     function Player(player) {
-        player = new Image();
-        player.src = 'images/ship.png';
+        player = images[IMG.ship];
         player.posX = player.width; // Dedault X position
         player.posY = (background.height / 2) - (player.height / 2); // Def Y pos
         player.centerX = player.posX + (player.width / 2);
@@ -504,8 +551,7 @@ var game = (function() {
      * @param {[type]} _y
      */
     function Boss(boss, _x, _y) {
-        boss = new Image();
-        boss.src = 'images/boss.png'; //128x128
+        boss = images[IMG.boss]; //128x128
         boss.posX = canvas.width - boss.width;
         boss.posY = canvas.height / 2 - boss.width / 2;
         boss.life = 700; //700 hits
