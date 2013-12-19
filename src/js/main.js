@@ -1064,6 +1064,10 @@ var game = (function() {
         bufferctx.fillStyle = '#fff';
         bufferctx.fillText('Score: ' + score, 50, 50);
 
+        if (!allowMusicChange) {
+            bufferctx.fillText('Music still loading...', 50, 100);
+        }
+
         printHelp();
 
     }
