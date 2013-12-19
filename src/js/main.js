@@ -266,16 +266,20 @@ var game = (function() {
                 background4Mirror.src = 'images/background-1-mirror.jpg';
                 background4Mirror.posX = 0;
 
-                foreground = images[IMG.foreground1];
+                foreground = new Image();
+                foreground.src = 'images/foreground-1.png';
                 foreground.posX = 0;
 
-                foreground2 = images[IMG.foreground2];
+                foreground2 = new Image();
+                foreground2.src = 'images/foreground-2.png';
                 foreground2.posX = foreground.width;
 
-                foreground3 = images[IMG.foreground3];
+                foreground3 = new Image();
+                foreground3.src = 'images/foreground-3.png';
                 foreground3.posX = foreground.width * 2;
 
-                foreground4 = images[IMG.foreground4];
+                foreground4 = new Image();
+                foreground4.src = 'images/foreground-4.png';
                 foreground4.posX = foreground.width * 3;
 
                 starfield = new Image();
@@ -283,23 +287,23 @@ var game = (function() {
                 starfield.posX = 0;
 
                 starfield2 = new Image();
-                starfield.src = 'images/starfield-2.png';
+                starfield2.src = 'images/starfield-2.png';
                 starfield2.posX = starfield.width;
 
                 starfield3 = new Image();
-                starfield.src = 'images/starfield-2.png';
+                starfield3.src = 'images/starfield-2.png';
                 starfield3.posX = starfield.width * 2;
 
                 starfield4 = new Image();
-                starfield.src = 'images/starfield-2.png';
+                starfield4.src = 'images/starfield-2.png';
                 starfield4.posX = starfield.width * 3;
 
                 starfield5 = new Image();
-                starfield.src = 'images/starfield-2.png';
+                starfield5.src = 'images/starfield-2.png';
                 starfield5.posX = starfield.width * 4;
 
                 starfield6 = new Image();
-                starfield.src = 'images/starfield-2.png';
+                starfield6.src = 'images/starfield-2.png';
                 starfield6.posX = starfield.width * 5;
 
                 currentAudioMusic = 0;
