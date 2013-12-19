@@ -129,7 +129,8 @@ var game = (function() {
         },
         score = 0,
         buggerMode = false,
-        bossMode = false;
+        bossMode = false,
+        allowMusicChange = false;
 
     function preloadImages() {
         var loaded = 0,
@@ -344,6 +345,7 @@ var game = (function() {
         }
         gainNode.connect(audioCtx.destination);
         audioMusic[0].start(0);
+        allowMusicChange = true;
     }
 
     /**
@@ -853,14 +855,14 @@ var game = (function() {
             bgSpeed -= 1;
             console.log(bgSpeed);
         }
-        if (keyPressed.toggleMusic) {
+        if (keyPressed.toggleMusic && allowMusicChange) {
             if (!changingMusic) {
                 changingMusic = true;
                 changeAudioMusic();
                 console.log('Changing music');
             }
         }
-        if (keyPressed.mute) {
+        if (keyPressed.mute && allowMusicChange) {
             if (!changingMusic) {
                 changingMusic = true;
                 toggleMute();
