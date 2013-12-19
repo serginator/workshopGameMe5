@@ -216,85 +216,95 @@ var game = (function() {
             audioBuffer = new window.BufferLoader(audioCtx, musicList.concat(fxList), createAudioSources);
             audioBuffer.load();
 
-            // Load resources
-            // Background pattern
-            background = images[IMG.background1];
-            background.posX = 0;
+            setTimeout(function() {
+                // Load resources
+                // Background pattern
+                background = new Image();
+                background.src = 'images/background-1.jpg';
+                background.posX = 0;
 
-            background2 = images[IMG.background2];
-            background2.posX = background.width;
+                background2 = new Image();
+                background2.src = 'images/background-2.jpg';
+                background2.posX = background.width;
 
-            background3 = images[IMG.background3];
-            background3.posX = background.width * 2;
+                background3 = new Image();
+                background3.src = 'images/background-3.jpg';
+                background3.posX = background.width * 2;
 
-            background4 = images[IMG.background4];
-            background4.posX = background.width * 3;
+                background4 = new Image();
+                background4.src = 'images/background-4.jpg';
+                background4.posX = background.width * 3;
 
-            backgroundMirror = images[IMG.background4m];
-            backgroundMirror.posX = background.width * 4;
+                backgroundMirror = new Image();
+                backgroundMirror.src = 'images/background-4-mirror.jpg';
+                backgroundMirror.posX = background.width * 4;
 
-            background2Mirror = images[IMG.background3m];
-            background2Mirror.posX = background.width * 5;
+                background2Mirror = new Image();
+                background2Mirror.src = 'images/background-3-mirror.jpg';
+                background2Mirror.posX = background.width * 5;
 
-            background3Mirror = images[IMG.background2m];
-            background3Mirror.posX = background.width * 6;
+                background3Mirror = new Image();
+                background3Mirror.src = 'images/background-2-mirror.jpg';
+                background3Mirror.posX = background.width * 6;
 
-            background4Mirror = images[IMG.background1m];
-            background4Mirror.posX = 0;
+                background4Mirror = new Image();
+                background4Mirror.src = 'images/background-1-mirror.jpg';
+                background4Mirror.posX = 0;
 
-            foreground = images[IMG.foreground1];
-            foreground.posX = 0;
+                foreground = images[IMG.foreground1];
+                foreground.posX = 0;
 
-            foreground2 = images[IMG.foreground2];
-            foreground2.posX = foreground.width;
+                foreground2 = images[IMG.foreground2];
+                foreground2.posX = foreground.width;
 
-            foreground3 = images[IMG.foreground3];
-            foreground3.posX = foreground.width * 2;
+                foreground3 = images[IMG.foreground3];
+                foreground3.posX = foreground.width * 2;
 
-            foreground4 = images[IMG.foreground4];
-            foreground4.posX = foreground.width * 3;
+                foreground4 = images[IMG.foreground4];
+                foreground4.posX = foreground.width * 3;
 
-            starfield = new Image();
-            starfield.src = 'images/starfield-2.png';
-            starfield.posX = 0;
+                starfield = new Image();
+                starfield.src = 'images/starfield-2.png';
+                starfield.posX = 0;
 
-            starfield2 = new Image();
-            starfield.src = 'images/starfield-2.png';
-            starfield2.posX = starfield.width;
+                starfield2 = new Image();
+                starfield.src = 'images/starfield-2.png';
+                starfield2.posX = starfield.width;
 
-            starfield3 = new Image();
-            starfield.src = 'images/starfield-2.png';
-            starfield3.posX = starfield.width * 2;
+                starfield3 = new Image();
+                starfield.src = 'images/starfield-2.png';
+                starfield3.posX = starfield.width * 2;
 
-            starfield4 = new Image();
-            starfield.src = 'images/starfield-2.png';
-            starfield4.posX = starfield.width * 3;
+                starfield4 = new Image();
+                starfield.src = 'images/starfield-2.png';
+                starfield4.posX = starfield.width * 3;
 
-            starfield5 = new Image();
-            starfield.src = 'images/starfield-2.png';
-            starfield5.posX = starfield.width * 4;
+                starfield5 = new Image();
+                starfield.src = 'images/starfield-2.png';
+                starfield5.posX = starfield.width * 4;
 
-            starfield6 = new Image();
-            starfield.src = 'images/starfield-2.png';
-            starfield6.posX = starfield.width * 5;
+                starfield6 = new Image();
+                starfield.src = 'images/starfield-2.png';
+                starfield6.posX = starfield.width * 5;
 
-            currentAudioMusic = 0;
+                currentAudioMusic = 0;
 
-            player = new Player();
+                player = new Player();
 
-            // Attach keyboard control
-            addListener(document, 'keydown', keyDown);
-            addListener(document, 'keyup', keyUp);
+                // Attach keyboard control
+                addListener(document, 'keydown', keyDown);
+                addListener(document, 'keyup', keyUp);
 
-            // Resizing Event
-            addListener(window, 'resize', resizeCanvas);
+                // Resizing Event
+                addListener(window, 'resize', resizeCanvas);
 
-            // Gameloop
-            var anim = function() {
-                resizeCanvas();
-                window.requestAnimFrame(anim);
-            };
-            anim();
+                // Gameloop
+                var anim = function() {
+                    resizeCanvas();
+                    window.requestAnimFrame(anim);
+                };
+                anim();
+            }, 10000);
         }
     }
 
