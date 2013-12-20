@@ -4,8 +4,15 @@ Demo para el taller de GameMe5 2013
 13-12-13
 por [@EtnasSoft](http://twitter.com/etnassoft) y [@serginator](http://twitter.com/serginator)
 
+## Ver la demo online
+[link](http://www.serginator.com/workshopGameMe5)
+
 ## Enhanced version
-En esta versión se pretende arreglar el preloading de recursos sin utilizar timeouts, además de hacer la demo compatible con Chrome y Firefox por igual, y tal vez añadir la parte de gamepad y touch que faltó.
+* Sonidos cambiados a OGG por compatibilidad
+* Preloading de recursos en vez de timeouts (algo simple pero eficaz)
+* Compatible con Chrome (online) y Firefox. No se ha probado en Safari.
+* [TODO] Touch events
+* [TODO] Gamepad
 
 ## Resources
 * Charla de [@EtnasSoft](http://twitter.com/etnassoft) y [@serginator](http://twitter.com/serginator) en Camon
@@ -24,7 +31,7 @@ En esta versión se pretende arreglar el preloading de recursos sin utilizar tim
 * [Megalista de recursos](http://www.mangatutorials.com/forum/showthread.php?742-The-Ultimate-Indie-Game-Developer-Resource-List)
 
 ## Para lanzar la demo
-Conviene ejecutarla en un servidor web por la carga de recursos por XHR. Además está optimizada para Firefox >= 26.
+Conviene ejecutarla en un servidor web por la carga de recursos por XHR. En Chrome en local da fallos visuales, online se ve correctamente (habrá que investigar por qué)
 ```bash
 npm install -g grunt-cli
 npm install
