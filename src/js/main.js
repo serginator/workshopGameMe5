@@ -130,7 +130,8 @@ var game = (function() {
         score = 0,
         buggerMode = false,
         bossMode = false,
-        allowMusicChange = false;
+        allowMusicChange = false,
+        touch = false;
 
     function preloadImages() {
         var loaded = 0,
@@ -233,97 +234,113 @@ var game = (function() {
             audioBuffer = new window.BufferLoader(audioCtx, musicList.concat(fxList), createAudioSources);
             audioBuffer.load();
 
-                // Load resources
-                // Background pattern
-                background = new Image();
-                background.src = 'images/background-1.jpg';
-                background.posX = 0;
+            // Load resources
+            // Background pattern
+            background = new Image();
+            background.src = 'images/background-1.jpg';
+            background.posX = 0;
 
-                background2 = new Image();
-                background2.src = 'images/background-2.jpg';
-                background2.posX = background.width;
+            background2 = new Image();
+            background2.src = 'images/background-2.jpg';
+            background2.posX = background.width;
 
-                background3 = new Image();
-                background3.src = 'images/background-3.jpg';
-                background3.posX = background.width * 2;
+            background3 = new Image();
+            background3.src = 'images/background-3.jpg';
+            background3.posX = background.width * 2;
 
-                background4 = new Image();
-                background4.src = 'images/background-4.jpg';
-                background4.posX = background.width * 3;
+            background4 = new Image();
+            background4.src = 'images/background-4.jpg';
+            background4.posX = background.width * 3;
 
-                backgroundMirror = new Image();
-                backgroundMirror.src = 'images/background-4-mirror.jpg';
-                backgroundMirror.posX = background.width * 4;
+            backgroundMirror = new Image();
+            backgroundMirror.src = 'images/background-4-mirror.jpg';
+            backgroundMirror.posX = background.width * 4;
 
-                background2Mirror = new Image();
-                background2Mirror.src = 'images/background-3-mirror.jpg';
-                background2Mirror.posX = background.width * 5;
+            background2Mirror = new Image();
+            background2Mirror.src = 'images/background-3-mirror.jpg';
+            background2Mirror.posX = background.width * 5;
 
-                background3Mirror = new Image();
-                background3Mirror.src = 'images/background-2-mirror.jpg';
-                background3Mirror.posX = background.width * 6;
+            background3Mirror = new Image();
+            background3Mirror.src = 'images/background-2-mirror.jpg';
+            background3Mirror.posX = background.width * 6;
 
-                background4Mirror = new Image();
-                background4Mirror.src = 'images/background-1-mirror.jpg';
-                background4Mirror.posX = 0;
+            background4Mirror = new Image();
+            background4Mirror.src = 'images/background-1-mirror.jpg';
+            background4Mirror.posX = 0;
 
-                foreground = new Image();
-                foreground.src = 'images/foreground-1.png';
-                foreground.posX = 0;
+            foreground = new Image();
+            foreground.src = 'images/foreground-1.png';
+            foreground.posX = 0;
 
-                foreground2 = new Image();
-                foreground2.src = 'images/foreground-2.png';
-                foreground2.posX = foreground.width;
+            foreground2 = new Image();
+            foreground2.src = 'images/foreground-2.png';
+            foreground2.posX = foreground.width;
 
-                foreground3 = new Image();
-                foreground3.src = 'images/foreground-3.png';
-                foreground3.posX = foreground.width * 2;
+            foreground3 = new Image();
+            foreground3.src = 'images/foreground-3.png';
+            foreground3.posX = foreground.width * 2;
 
-                foreground4 = new Image();
-                foreground4.src = 'images/foreground-4.png';
-                foreground4.posX = foreground.width * 3;
+            foreground4 = new Image();
+            foreground4.src = 'images/foreground-4.png';
+            foreground4.posX = foreground.width * 3;
 
-                starfield = new Image();
-                starfield.src = 'images/starfield-2.png';
-                starfield.posX = 0;
+            starfield = new Image();
+            starfield.src = 'images/starfield-2.png';
+            starfield.posX = 0;
 
-                starfield2 = new Image();
-                starfield2.src = 'images/starfield-2.png';
-                starfield2.posX = starfield.width;
+            starfield2 = new Image();
+            starfield2.src = 'images/starfield-2.png';
+            starfield2.posX = starfield.width;
 
-                starfield3 = new Image();
-                starfield3.src = 'images/starfield-2.png';
-                starfield3.posX = starfield.width * 2;
+            starfield3 = new Image();
+            starfield3.src = 'images/starfield-2.png';
+            starfield3.posX = starfield.width * 2;
 
-                starfield4 = new Image();
-                starfield4.src = 'images/starfield-2.png';
-                starfield4.posX = starfield.width * 3;
+            starfield4 = new Image();
+            starfield4.src = 'images/starfield-2.png';
+            starfield4.posX = starfield.width * 3;
 
-                starfield5 = new Image();
-                starfield5.src = 'images/starfield-2.png';
-                starfield5.posX = starfield.width * 4;
+            starfield5 = new Image();
+            starfield5.src = 'images/starfield-2.png';
+            starfield5.posX = starfield.width * 4;
 
-                starfield6 = new Image();
-                starfield6.src = 'images/starfield-2.png';
-                starfield6.posX = starfield.width * 5;
+            starfield6 = new Image();
+            starfield6.src = 'images/starfield-2.png';
+            starfield6.posX = starfield.width * 5;
 
-                currentAudioMusic = 0;
+            currentAudioMusic = 0;
 
-                player = new Player();
+            player = new Player();
 
-                // Attach keyboard control
-                addListener(document, 'keydown', keyDown);
-                addListener(document, 'keyup', keyUp);
+            // Attach keyboard control
+            addListener(document, 'keydown', keyDown);
+            addListener(document, 'keyup', keyUp);
 
-                // Resizing Event
-                addListener(window, 'resize', resizeCanvas);
+            document.addEventListener('touchstart', function(e){
+                player.moveTo(e.touches[0]);
+                touch = true;
+                player.firing = true;
+                e.preventDefault();
+            });
+            document.addEventListener('touchmove', function(e){
+                player.moveTo(e.touches[0]);
+                e.preventDefault();
+            });
+            document.addEventListener('touchend', function(e){
+                player.moveTo(e.touches[0]);
+                player.firing = false;
+                e.preventDefault();
+            });
 
-                // Gameloop
-                var anim = function() {
-                    resizeCanvas();
-                    window.requestAnimFrame(anim);
-                };
-                anim();
+            // Resizing Event
+            addListener(window, 'resize', resizeCanvas);
+
+            // Gameloop
+            var anim = function() {
+                resizeCanvas();
+                window.requestAnimFrame(anim);
+            };
+            anim();
         }
     }
 
@@ -432,6 +449,15 @@ var game = (function() {
            firerate: 20
         };
         player.weapon.spread = Math.PI / player.weapon.spreadBase;
+
+        player.moveTo =function(data) {
+            var x = data.pageX - player.width / 2,
+                y = data.pageY - player.height / 2;
+            if (x > 0 && x < canvas.width && y > 0 && y < canvas.height) {
+                player.posX = x;
+                player.posY = y;
+            }
+        };
 
         /**
          * Method to sread bullets
@@ -841,7 +867,7 @@ var game = (function() {
         }
         if (keyPressed.fire) {
             player.firing = true;
-        } else {
+        } else if (keyPressed.fire === false && !touch) {
             player.firing = false;
         }
         if (keyPressed.fire2) {
