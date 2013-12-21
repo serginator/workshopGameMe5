@@ -142,7 +142,7 @@ module.exports = function (grunt) {
     ]);
 
     grunt.registerTask('deploy', [
-        'dist', 'githubPages'
+        'lint', 'dist', 'githubPages'
     ]);
 
 };
