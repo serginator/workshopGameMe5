@@ -57,3 +57,14 @@ grunt
 * Explosiones, sistema de partículas
 * Bomba: fogonazo con FX que borre los enemigos.
 * Mapa de colisiones: limitar el hitbox del protagonista al sprite del 'focus'.
+
+## Para hacer deploy en gh-pages
+```
+# Chuletilla para que no se me olvide
+# desde la raíz del proyecto
+git clone git@github.com:serginator/workshopGameMe5.git dist
+cd dist
+git checkout --orphan gh-pages
+git rm -rf .
+grunt deploy # hará linteo, la distribución y luego lanzará el paquete grunt-github-pages
+```
