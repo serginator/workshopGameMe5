@@ -73,7 +73,7 @@ module.exports = function (grunt) {
                 }
             }
         },
-        clean: [OUTPUT_DIR, 'dist/<%= pkg.name %>-<%= pkg.version %>.zip'],
+        clean: [OUTPUT_DIR + '**(!.git)'],
         copy: {
             main: {
                 files: [
