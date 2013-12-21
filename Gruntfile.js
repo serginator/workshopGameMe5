@@ -6,7 +6,8 @@
 module.exports = function (grunt) {
 
     var SRC_DIR = 'src/',
-        REPORTS_DIR = 'reports/';
+        REPORTS_DIR = 'reports/',
+        OUTPUT_DIR = 'dist/';
 
     // This will load all packages instead of loading here one by one
     require('load-grunt-tasks')(grunt);
@@ -71,6 +72,48 @@ module.exports = function (grunt) {
                     keepalive: true
                 }
             }
+        },
+        clean: [OUTPUT_DIR, 'dist/<%= pkg.name %>-<%= pkg.version %>.zip'],
+        copy: {
+            main: {
+                files: [
+                    {expand: true, cwd: SRC_DIR, src: ['images/**'], dest: OUTPUT_DIR},
+                    {expand: true, cwd: SRC_DIR, src: ['music/**'], dest: OUTPUT_DIR},
+                    {expand: true, cwd: SRC_DIR, src: ['css/**'], dest: OUTPUT_DIR},
+                    {expand: true, cwd: SRC_DIR, src: ['index.html'], dest: OUTPUT_DIR}
+                ]
+            }
+        },
+        requirejs: {
+            options: {
+                baseUrl: SRC_DIR + 'js/',
+                cjsTranslate: true,
+                useStrict: true,
+                preserveLicenseComments: false,
+                generateSourceMaps: true,
+                optimize: 'uglify2',
+                include: ['almond.js'] // runtime de requirejs
+            },
+            core: {
+                options: {
+                    name: 'main',
+                    insertRequire: ['main'],
+                    out: 'dist/js/main.js',
+                    uglify2: {
+                        report: 'gzip'
+                    }
+                }
+            }
+        },
+        compress: {
+            core: {
+                options: {
+                    archive: 'dist/<%= pkg.name %>-<%= pkg.version %>.zip'
+                },
+                files: [
+                    {expand: true, cwd: 'dist/', src: ['**'], dest: ''}
+                ]
+            }
         }
     });
 
@@ -80,6 +123,14 @@ module.exports = function (grunt) {
 
     grunt.registerTask('lint', [
         'jshint', 'gjslint'
+    ]);
+
+    grunt.registerTask('dist', [
+        'clean', 'requirejs', 'copy'
+    ]);
+
+    grunt.registerTask('build', [
+        'lint', 'dist', 'compress'
     ]);
 
 };

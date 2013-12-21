@@ -363,17 +363,17 @@ var game = (function() {
             addListener(document, 'keydown', keyDown);
             addListener(document, 'keyup', keyUp);
 
-            document.addEventListener('touchstart', function(e){
+            document.addEventListener('touchstart', function(e) {
                 player.moveTo(e.touches[0]);
                 touch = true;
                 player.firing = true;
                 e.preventDefault();
             });
-            document.addEventListener('touchmove', function(e){
+            document.addEventListener('touchmove', function(e) {
                 player.moveTo(e.touches[0]);
                 e.preventDefault();
             });
-            document.addEventListener('touchend', function(e){
+            document.addEventListener('touchend', function(e) {
                 player.moveTo(e.touches[0]);
                 player.firing = false;
                 e.preventDefault();
@@ -497,7 +497,7 @@ var game = (function() {
         };
         player.weapon.spread = Math.PI / player.weapon.spreadBase;
 
-        player.moveTo =function(data) {
+        player.moveTo = function(data) {
             var x = data.pageX - player.width / 2,
                 y = data.pageY - player.height / 2;
             if (x > 0 && x < canvas.width && y > 0 && y < canvas.height) {
@@ -598,7 +598,9 @@ var game = (function() {
                 });
                 shot.add();
             }
-            allowMusicChange && playFx(musicList.length + FX.shot);
+            if (allowMusicChange) {
+                playFx(musicList.length + FX.shot);
+            }
         };
 
         /**
@@ -724,7 +726,9 @@ var game = (function() {
                 (a.posY <= bY && bY < (a.posY + a.width))) {
                 callback();
                 makeExplosion(a.posX, a.posY);
-                allowMusicChange && playFx(musicList.length + FX.explosion);
+                if (allowMusicChange) {
+                    playFx(musicList.length + FX.explosion);
+                }
                 return true;
             }
         }
@@ -1041,7 +1045,9 @@ var game = (function() {
 
         player.bombing = true;
 
-        allowMusicChange && playFx(musicList.length + FX.bomb);
+        if (allowMusicChange) {
+            playFx(musicList.length + FX.bomb);
+        }
 
         // BOMB
         particleManager.createExplosion(0, 0, 130, 15, 70, 3, 0);

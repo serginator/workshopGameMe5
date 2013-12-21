@@ -9,7 +9,7 @@
 /*global setTimeout: false */
 
 var requirejs, require, define;
-(function (undef) {
+(function(undef) {
     var main, req, makeMap, handlers,
         defined = {},
         waiting = {},
@@ -28,17 +28,17 @@ var requirejs, require, define;
      * @param {String} name the relative name
      * @param {String} baseName a real name that the name arg is relative
      * to.
-     * @returns {String} normalized name
+     * @return {String} normalized name
      */
     function normalize(name, baseName) {
         var nameParts, nameSegment, mapValue, foundMap,
             foundI, foundStarMap, starI, i, j, part,
-            baseParts = baseName && baseName.split("/"),
+            baseParts = baseName && baseName.split('/'),
             map = config.map,
             starMap = (map && map['*']) || {};
 
         //Adjust any relative paths.
-        if (name && name.charAt(0) === ".") {
+        if (name && name.charAt(0) === '.') {
             //If have a base name, try to normalize against it,
             //otherwise, assume it is a top-level require that will
             //be relative to baseUrl in the end.
@@ -50,15 +50,15 @@ var requirejs, require, define;
                 //this normalization.
                 baseParts = baseParts.slice(0, baseParts.length - 1);
 
-                name = baseParts.concat(name.split("/"));
+                name = baseParts.concat(name.split('/'));
 
                 //start trimDots
                 for (i = 0; i < name.length; i += 1) {
                     part = name[i];
-                    if (part === ".") {
+                    if (part === '.') {
                         name.splice(i, 1);
                         i -= 1;
-                    } else if (part === "..") {
+                    } else if (part === '..') {
                         if (i === 1 && (name[2] === '..' || name[0] === '..')) {
                             //End of the line. Keep at least one non-dot
                             //path segment at the front so it can be mapped
@@ -75,7 +75,7 @@ var requirejs, require, define;
                 }
                 //end trimDots
 
-                name = name.join("/");
+                name = name.join('/');
             } else if (name.indexOf('./') === 0) {
                 // No baseName, so this is ID is resolved relative
                 // to baseUrl, pull off the leading dot.
@@ -88,7 +88,7 @@ var requirejs, require, define;
             nameParts = name.split('/');
 
             for (i = nameParts.length; i > 0; i -= 1) {
-                nameSegment = nameParts.slice(0, i).join("/");
+                nameSegment = nameParts.slice(0, i).join('/');
 
                 if (baseParts) {
                     //Find the longest baseName segment match in the config.
@@ -138,7 +138,7 @@ var requirejs, require, define;
     }
 
     function makeRequire(relName, forceSync) {
-        return function () {
+        return function() {
             //A version of a require function that passes a moduleName
             //value for items that may need to
             //look up paths relative to the moduleName
@@ -147,13 +147,13 @@ var requirejs, require, define;
     }
 
     function makeNormalize(relName) {
-        return function (name) {
+        return function(name) {
             return normalize(name, relName);
         };
     }
 
     function makeLoad(depName) {
-        return function (value) {
+        return function(value) {
             defined[depName] = value;
         };
     }
@@ -190,7 +190,7 @@ var requirejs, require, define;
      * for normalization if necessary. Grabs a ref to plugin
      * too, as an optimization.
      */
-    makeMap = function (name, relName) {
+    makeMap = function(name, relName) {
         var plugin,
             parts = splitPrefix(name),
             prefix = parts[0];
@@ -229,16 +229,16 @@ var requirejs, require, define;
     };
 
     function makeConfig(name) {
-        return function () {
+        return function() {
             return (config && config.config && config.config[name]) || {};
         };
     }
 
     handlers = {
-        require: function (name) {
+        require: function(name) {
             return makeRequire(name);
         },
-        exports: function (name) {
+        exports: function(name) {
             var e = defined[name];
             if (typeof e !== 'undefined') {
                 return e;
@@ -246,7 +246,7 @@ var requirejs, require, define;
                 return (defined[name] = {});
             }
         },
-        module: function (name) {
+        module: function(name) {
             return {
                 id: name,
                 uri: '',
@@ -256,7 +256,7 @@ var requirejs, require, define;
         }
     };
 
-    main = function (name, deps, callback, relName) {
+    main = function(name, deps, callback, relName) {
         var cjsModule, depName, ret, map, i,
             args = [],
             usingExports;
@@ -276,13 +276,13 @@ var requirejs, require, define;
                 depName = map.f;
 
                 //Fast path CommonJS standard dependencies.
-                if (depName === "require") {
+                if (depName === 'require') {
                     args[i] = handlers.require(name);
-                } else if (depName === "exports") {
+                } else if (depName === 'exports') {
                     //CommonJS module spec 1.1
                     args[i] = handlers.exports(name);
                     usingExports = true;
-                } else if (depName === "module") {
+                } else if (depName === 'module') {
                     //CommonJS module spec 1.1
                     cjsModule = args[i] = handlers.module(name);
                 } else if (hasProp(defined, depName) ||
@@ -318,8 +318,8 @@ var requirejs, require, define;
         }
     };
 
-    requirejs = require = req = function (deps, callback, relName, forceSync, alt) {
-        if (typeof deps === "string") {
+    requirejs = require = req = function(deps, callback, relName, forceSync, alt) {
+        if (typeof deps === 'string') {
             if (handlers[deps]) {
                 //callback in this case is really relName
                 return handlers[deps](callback);
@@ -344,7 +344,7 @@ var requirejs, require, define;
         }
 
         //Support require(['a'])
-        callback = callback || function () {};
+        callback = callback || function() {};
 
         //If relName is a function, it is an errback handler,
         //so remove it.
@@ -363,7 +363,7 @@ var requirejs, require, define;
             //If want a value immediately, use require('id') instead -- something
             //that works in almond on the global level, but not guaranteed and
             //unlikely to work in other AMD implementations.
-            setTimeout(function () {
+            setTimeout(function() {
                 main(undef, deps, callback, relName);
             }, 4);
         }
@@ -375,7 +375,7 @@ var requirejs, require, define;
      * Just drops the config on the floor, but returns req in case
      * the config return value is used.
      */
-    req.config = function (cfg) {
+    req.config = function(cfg) {
         config = cfg;
         if (config.deps) {
             req(config.deps, config.callback);
@@ -383,7 +383,7 @@ var requirejs, require, define;
         return req;
     };
 
-    define = function (name, deps, callback) {
+    define = function(name, deps, callback) {
 
         //This module may not have dependencies
         if (!deps.splice) {
