@@ -919,6 +919,7 @@ var game = (function() {
         }
         if (keyPressed.fire) {
             player.firing = true;
+            touch = false;
         } else if (keyPressed.fire === false && !touch) {
             player.firing = false;
         }
