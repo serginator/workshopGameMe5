@@ -114,6 +114,14 @@ module.exports = function (grunt) {
                     {expand: true, cwd: 'dist/', src: ['**'], dest: ''}
                 ]
             }
+        },
+        githubPages: {
+            target: {
+                options: {
+                    commitMessage: 'Pushed version <%= pkg.version %>'
+                },
+                src: OUTPUT_DIR
+            }
         }
     });
 
@@ -131,6 +139,10 @@ module.exports = function (grunt) {
 
     grunt.registerTask('build', [
         'lint', 'dist', 'compress'
+    ]);
+
+    grunt.registerTask('deploy', [
+        'dist', 'githubPages'
     ]);
 
 };
