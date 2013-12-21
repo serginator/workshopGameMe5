@@ -97,7 +97,6 @@ module.exports = function (grunt) {
             core: {
                 options: {
                     name: 'main',
-                    insertRequire: ['main'],
                     out: 'dist/js/main.js',
                     uglify2: {
                         report: 'gzip'
