@@ -1,2 +1,3 @@
 node_modules/**/*.js
 reports/**/*.js
+src/js/almond.js

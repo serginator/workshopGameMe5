@@ -1,6 +1,6 @@
 {
-  "name": "navecitas",
-  "version": "0.0.0",
+  "name": "workshopGameMe5",
+  "version": "0.9.0",
   "description": "Juego para el taller de GameMe5",
   "main": "main.js",
   "scripts": {
