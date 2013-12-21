@@ -375,6 +375,7 @@ var game = (function() {
             });
             document.addEventListener('touchend', function(e) {
                 player.moveTo(e.touches[0]);
+                touch = false;
                 player.firing = false;
                 e.preventDefault();
             });
