@@ -928,24 +928,20 @@ var game = (function() {
         }
         if (keyPressed.speedUp && bgSpeed < 10) {
             bgSpeed += 1;
-            console.log(bgSpeed);
         }
         if (keyPressed.speedDown && bgSpeed >= 2) {
             bgSpeed -= 1;
-            console.log(bgSpeed);
         }
         if (keyPressed.toggleMusic && allowMusicChange) {
             if (!changingMusic) {
                 changingMusic = true;
                 changeAudioMusic();
-                console.log('Changing music');
             }
         }
         if (keyPressed.mute && allowMusicChange) {
             if (!changingMusic) {
                 changingMusic = true;
                 toggleMute();
-                console.log('Mute');
             }
         }
         if (keyPressed.buggerMode) {
