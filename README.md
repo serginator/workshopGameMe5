@@ -4,7 +4,7 @@ Demo para el taller de GameMe5 2013
 13-12-13
 por [@EtnasSoft](http://twitter.com/etnassoft) y [@serginator](http://twitter.com/serginator)
 
-## Ver la [demo online](http://www.serginator.com/workshopGameMe5)
+## Ver la [demo online](http://serginator.github.io/workshopGameMe5/)
 
 ## Enhanced version
 * Sonidos cambiados a OGG por compatibilidad
