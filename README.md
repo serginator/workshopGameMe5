@@ -10,7 +10,7 @@ por [@EtnasSoft](http://twitter.com/etnassoft) y [@serginator](http://twitter.co
 * Sonidos cambiados a OGG por compatibilidad
 * Preloading de recursos en vez de timeouts (algo simple pero eficaz)
 * Compatible con Chrome (online) y Firefox. No se ha probado en Safari.
-* [TODO] Touch events
+* Touch events
 * [TODO] Gamepad
 
 ## Resources
