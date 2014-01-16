@@ -68,3 +68,5 @@ git checkout --orphan gh-pages
 git rm -rf .
 grunt deploy # hará linteo, la distribución y luego lanzará el paquete grunt-github-pages
 ```
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/serginator/workshopgameme5/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
