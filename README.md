@@ -48,3 +48,5 @@ grunt
 * Explosiones, sistema de partículas
 * Bomba: fogonazo con FX que borre los enemigos.
 * Mapa de colisiones: limitar el hitbox del protagonista al sprite del 'focus'.
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/serginator/workshopgameme5/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
