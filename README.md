@@ -1,5 +1,7 @@
 # Workshop GameMe 5
 
+[![Build Status](https://travis-ci.org/serginator/workshopGameMe5.svg)](https://travis-ci.org/serginator/workshopGameMe5)
+
 Demo para el taller de GameMe5 2013
 13-12-13
 por [@EtnasSoft](http://twitter.com/etnassoft) y [@serginator](http://twitter.com/serginator)
